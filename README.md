@@ -1,16 +1,32 @@
-# scarpetta
+# Scarpetta
 
-A new Flutter project.
+>**Scarpetta** (*italian*)  
+> n.  
+> 1. The act of mopping up leftover sauce on a plate with a piece of bread, typically performed at the end of a meal.  
+> Example: "After finishing her pasta, she made a scarpetta to savor every bit of the delicious tomato sauce."  
 
-## Getting Started
+Scarpetta is a simple, open source, cross-platform recipe app written in Flutter.
 
-This project is a starting point for a Flutter application.
+## Core features
+All users:
+* Viewing individual recipes
+* Listing recipe categories
+* Listing recipes in a given category
+* Searching recipes by name
 
-A few resources to get you started if this is your first Flutter project:
+With an account:
+* Creating and editing recipes
+* Marking recipes as favorite
+* Listing favorite recipes
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Write your documentation for the project below.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+TODO: Name of the application
+
+TODO: Brief description of the application
+
+TODO: 3 key challenges faced during the project
+
+TODO: 3 key learning moments from working on the project
+
+TODO: list of dependencies and their versions (from pubspec.yaml)
