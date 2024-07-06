@@ -18,10 +18,13 @@ class MainTheme extends ThemeExtension<MainTheme> {
     final headingTextTheme = GoogleFonts.ebGaramondTextTheme();
     final bodyTextTheme = GoogleFonts.interTextTheme();
 
-    return headingTextTheme.copyWith(
-      bodyLarge: bodyTextTheme.bodyLarge,
-      bodyMedium: bodyTextTheme.bodyMedium,
-      bodySmall: bodyTextTheme.bodySmall
+    return bodyTextTheme.copyWith(
+      displayLarge: headingTextTheme.displayLarge,
+      displayMedium: headingTextTheme.displayMedium,
+      displaySmall: headingTextTheme.displaySmall,
+      titleLarge: headingTextTheme.titleLarge,
+      titleMedium: headingTextTheme.titleMedium,
+      titleSmall: headingTextTheme.titleSmall,
     );
   }
 
@@ -107,6 +110,8 @@ class MainTheme extends ThemeExtension<MainTheme> {
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        titleTextStyle: textTheme.titleLarge?.copyWith(fontSize: 38, fontWeight: FontWeight.w500),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surface,

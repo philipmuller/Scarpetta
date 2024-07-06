@@ -1,7 +1,7 @@
 # Scarpetta
 
 >**Scarpetta** (*italian*)  
-> n.  
+> *n.*  
 > 1. The act of mopping up leftover sauce on a plate with a piece of bread, typically performed at the end of a meal.  
 > Example: "After finishing her pasta, she made a scarpetta to savor every bit of the delicious tomato sauce."  
 
