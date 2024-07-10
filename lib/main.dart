@@ -1,31 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:scarpetta/themes/main_theme.dart';
-import 'package:scarpetta/components/adaptive_navigator.dart';
-import 'package:go_router/go_router.dart';
-import 'package:scarpetta/util/navigation_target.dart';
+import 'package:scarpetta/util/router.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-final router = GoRouter(
-  initialLocation: "/",
-  routes: [
-    StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) {
-        return AdaptiveNavigator(
-          routes: NavigationTarget.allTargets(), 
-          body: const Text("Hello, World!"), 
-          navigationShell: navigationShell
-        );
-      },
-      branches: [
-        for (var target in NavigationTarget.allTargets())
-          StatefulShellBranch(routes: [
-            GoRoute(path: target.route, builder: (context, state) => Text(target.label),)
-          ])
-      ]
-    )
-  ]
-);
+void main() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-main() {
   runApp(const Scarpetta());
 }
 

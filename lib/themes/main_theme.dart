@@ -20,11 +20,8 @@ class MainTheme extends ThemeExtension<MainTheme> {
 
     return bodyTextTheme.copyWith(
       displayLarge: headingTextTheme.displayLarge,
-      displayMedium: headingTextTheme.displayMedium,
+      displayMedium: headingTextTheme.displayMedium?.copyWith(fontWeight: FontWeight.w600),
       displaySmall: headingTextTheme.displaySmall,
-      titleLarge: headingTextTheme.titleLarge,
-      titleMedium: headingTextTheme.titleMedium,
-      titleSmall: headingTextTheme.titleSmall,
     );
   }
 
@@ -109,9 +106,8 @@ class MainTheme extends ThemeExtension<MainTheme> {
         indicatorColor: colorScheme.secondaryContainer
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
-        titleTextStyle: textTheme.titleLarge?.copyWith(fontSize: 38, fontWeight: FontWeight.w500),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surface,

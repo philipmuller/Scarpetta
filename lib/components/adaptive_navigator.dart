@@ -3,12 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:go_router/go_router.dart';
-import 'package:scarpetta/util/navigation_target.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:scarpetta/util/navigator_target.dart';
+import 'package:scarpetta/components/sc_app_bar.dart';
 
 class AdaptiveNavigator extends StatefulWidget {
   final Widget? body;
-  final List<NavigationTarget> routes; //this assumes the app uses go_router
+  final List<NavigatorTarget> routes; //this assumes the app uses go_router
   final StatefulNavigationShell? navigationShell;
 
   const AdaptiveNavigator({super.key, this.body, required this.routes, this.navigationShell});
@@ -23,19 +23,45 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    bool extendedRail = false;
-    //if desktop
-    if (width >= Breakpoint.lg) { 
-      //for now, we don't care about this. I'd like to try using the NavigationRail for desktop too
+
+    if (width >= Breakpoint.lg) {
+      //implement desktop layout
     }
 
-    //if tablet
     if (width >= Breakpoint.md) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text("Scarpetta"),
+      return _tabletLayout();
+    }
+
+    return _mobileLayout();
+  }
+
+  Widget _mobileLayout() {
+    return Scaffold(
+        appBar: _appBar(),
+        extendBodyBehindAppBar: true,
+        body: widget.navigationShell,
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (index) {
+            context.go(widget.routes[index].route);
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          destinations: widget.routes.map((route) {
+            return NavigationDestination(
+              icon: route.icon,
+              label: route.label,
+            );
+          }).toList(),
         ),
-        body: Row(
+    );
+  }
+
+  Widget _tabletLayout() {
+    bool extendedRail = false;
+    
+    return Row(
         children: [
           NavigationRail(
             selectedIndex: _selectedIndex,
@@ -48,7 +74,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
                 _selectedIndex = index;
               });
             },
-            labelType: extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
+            labelType: NavigationRailLabelType.selected, //extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
             destinations: widget.routes.map((route) {
               return NavigationRailDestination(
                 icon: route.icon,
@@ -58,34 +84,17 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
           ),
           //const VerticalDivider(thickness: 1, width: 1),
           Expanded(
-            child: widget.navigationShell!,
-          ),
+            child: Scaffold(
+              appBar: _appBar(),
+              extendBodyBehindAppBar: true,
+              body: widget.navigationShell,
+            ),
+          )
         ],
-      )
       );
-    }
-    
-    //if mobile
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Scarpetta"),
-      ),
-      body: widget.navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          context.go(widget.routes[index].route);
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        destinations: widget.routes.map((route) {
-          return NavigationDestination(
-            icon: route.icon,
-            label: route.label,
-          );
-        }).toList(),
-      ),
-    );
+  }
+
+  SCAppBar _appBar() {
+    return SCAppBar(title: widget.routes[_selectedIndex].label);
   }
 }

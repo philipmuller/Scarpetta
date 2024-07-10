@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967996568401",
+    "project_id": "scarpetta-bb13b",
+    "storage_bucket": "scarpetta-bb13b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967996568401:android:82afb0d24c1e1357725970",
+        "android_client_info": {
+          "package_name": "com.scarpetta.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXYI-NTqAp8cGgPf3OTwuvEYvYZIqNCsU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
