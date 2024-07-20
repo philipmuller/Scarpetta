@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
+import 'package:scarpetta/util/breakpoint.dart';
 
 class CategoriesPage extends StatelessWidget {
-  final double topPadding = 60.0;
-  final double xPadding = 30.0;
   final Function(Category)? onCategoryTap;
   final bool push;
 
@@ -13,6 +12,14 @@ class CategoriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double topPadding = 60.0;
+    double xPadding = 30.0;
+    int gridColumns = 3;
+    if (width > Breakpoint.lg) {
+      gridColumns = 2;
+      xPadding = 10.0;
+    }
 
     return FutureBuilder(
       future: CookbookService.getCategories(),
@@ -25,7 +32,7 @@ class CategoriesPage extends StatelessWidget {
           color: Theme.of(context).colorScheme.surface,
           child: GridView.count(
             padding: EdgeInsets.only(top: topPadding, left: xPadding, right: xPadding),
-            crossAxisCount: 3,
+            crossAxisCount: gridColumns,
             crossAxisSpacing: 5.0,
             mainAxisSpacing: 5.0,
             children: snapshot.data!.map((category) {

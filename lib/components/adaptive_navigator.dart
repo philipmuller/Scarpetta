@@ -49,7 +49,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     //GoRouter.of(context).routeInformationProvider.didPopRoute();
 
     if (width >= Breakpoint.lg) {
-      //implement desktop layout
+      return desktopLayout();
     }
 
     if (width >= Breakpoint.md) {
@@ -86,36 +86,73 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     bool extendedRail = false;
     
     return Row(
-        children: [
-          NavigationRail(
-            selectedIndex: _selectedIndex,
-            groupAlignment: 0.0,
-            extended: extendedRail,
-            minWidth: 100,
-            onDestinationSelected: (index) {
-              context.go(widget.routes[index].route);
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            labelType: NavigationRailLabelType.selected, //extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
-            destinations: widget.routes.map((route) {
-              return NavigationRailDestination(
+      children: [
+        NavigationRail(
+          selectedIndex: _selectedIndex,
+          groupAlignment: 0.0,
+          extended: extendedRail,
+          minWidth: 100,
+          onDestinationSelected: (index) {
+            context.go(widget.routes[index].route);
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          labelType: NavigationRailLabelType.selected, //extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
+          destinations: widget.routes.map((route) {
+            return NavigationRailDestination(
+              icon: route.icon,
+              label: Text(route.label),
+            );
+          }).toList(),
+        ),
+        //const VerticalDivider(thickness: 1, width: 1),
+        Expanded(
+          child: Scaffold(
+            appBar: _appBar(),
+            extendBodyBehindAppBar: true,
+            body: widget.navigationShell,
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget desktopLayout() {
+    return Row(
+      children: [
+        NavigationDrawer(
+          selectedIndex: _selectedIndex,
+          onDestinationSelected: (index) {
+            context.go(widget.routes[index].route);
+            setState(() {
+              _selectedIndex = index;
+            });
+          },//extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20),
+              child: Text("Scarpetta", style: Theme.of(context).textTheme.displayMedium!.copyWith(color: Theme.of(context).colorScheme.primary)),
+            ),
+            //const SizedBox(height: 50),
+            ...widget.routes.map((route) {
+              return NavigationDrawerDestination(
                 icon: route.icon,
                 label: Text(route.label),
               );
-            }).toList(),
+            }).toList()
+          ],
+        ),
+        //const VerticalDivider(thickness: 1, width: 1),
+        Expanded(
+          child: Scaffold(
+            appBar: _appBar(),
+            extendBodyBehindAppBar: true,
+            body: widget.navigationShell,
           ),
-          //const VerticalDivider(thickness: 1, width: 1),
-          Expanded(
-            child: Scaffold(
-              appBar: _appBar(),
-              extendBodyBehindAppBar: true,
-              body: widget.navigationShell,
-            ),
-          )
-        ],
-      );
+        )
+      ],
+    );
   }
 
   AppBar _appBar() {
@@ -145,7 +182,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
           IconButton(
             icon: const PhosphorIcon(PhosphorIconsRegular.arrowLeft),
             onPressed: () {
-              GoRouter.of(context).pop();
+              context.pop();
             },
           ),
         ],
@@ -211,7 +248,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         _isShowingRecipe = false;
       }
 
-      if (route != "/" && route != "/recipes" && !route.contains("/recipes/categories/") && route != "/profile") {
+      if (route != "/" && route != "/recipes" && !route.contains("/recipes/categories/") && route != "/profile" && route != "") {
         _isRootNode = false;
       } else {
         _isRootNode = true;
@@ -231,6 +268,10 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
 
     if (id == null) {
       return 0;
+    }
+
+    if (id! == "") { //this is a terrible bugfix, I hate it, it is painful
+      return 1;
     }
 
     if (id!.contains("home")) {

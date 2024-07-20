@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
+import 'package:scarpetta/util/breakpoint.dart';
 
 class RecipePage extends StatelessWidget {
   final String recipeId;
@@ -12,7 +13,11 @@ class RecipePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Recipe Page received recipeId: $recipeId");
+    double width = MediaQuery.of(context).size.width;
+    bool isMobile = true;
+    if (width > Breakpoint.md) {
+      isMobile = false;
+    }
     return FutureBuilder<Recipe?>(
       future: CookbookService.getRecipe(recipeId),
       builder: (context, snapshot) {
@@ -25,7 +30,13 @@ class RecipePage extends StatelessWidget {
           return SingleChildScrollView(
             child: Column(
               children: [
-                SCImage(imageUrl: recipe.imageUrl, height: 400.0),
+                Padding(
+                  padding: EdgeInsets.all(isMobile ? 0 : 10.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(isMobile ? Radius.zero : Radius.circular(30.0)),
+                    child: SCImage(imageUrl: recipe.imageUrl, height: isMobile ? 400.0 : 500.0)
+                  ),
+                ),
                 Padding(
                   padding: EdgeInsets.only(top: topPadding, left: xPadding, right: xPadding, bottom: 30.0),
                   child: Column(

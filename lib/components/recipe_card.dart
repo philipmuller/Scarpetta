@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
+import 'package:scarpetta/util/breakpoint.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
@@ -13,6 +14,19 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    double verticalPadding = 30.0;
+    double horizontalPadding = 35.0;
+
+    TextStyle titleStyle = Theme.of(context).textTheme.displaySmall!;
+    TextStyle descriptionStyle = Theme.of(context).textTheme.bodyMedium!;
+
+    if (width > Breakpoint.md) {
+      verticalPadding = 20.0;
+      horizontalPadding = 25.0;
+      titleStyle = Theme.of(context).textTheme.displaySmall!.copyWith(fontSize: 25, fontWeight: FontWeight.w500);
+      descriptionStyle = Theme.of(context).textTheme.bodySmall!;
+    }
 
     return GestureDetector(
       onTap: () {
@@ -41,15 +55,14 @@ class RecipeCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _recipeImage(context),
-            const SizedBox(height: 20.0),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 35.0),
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(recipe.name, style: Theme.of(context).textTheme.displaySmall),
+                  Text(recipe.name, style: titleStyle),
                   const SizedBox(height: 10.0),
-                  Text(recipe.description, style: Theme.of(context).textTheme.bodyMedium, maxLines: 3,),
+                  Text(recipe.description, style: descriptionStyle, maxLines: 3,),
                 ],
               ),
             ),
@@ -60,11 +73,10 @@ class RecipeCard extends StatelessWidget {
   }
 
   Widget _recipeImage(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
+    return Expanded(
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        child: SCImage(imageUrl: recipe.imageUrl, height: 320),
+        child: SCImage(imageUrl: recipe.imageUrl, height: double.infinity,),
       ),
     );
   }
