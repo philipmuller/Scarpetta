@@ -5,7 +5,7 @@
 > 1. The act of mopping up leftover sauce on a plate with a piece of bread, typically performed at the end of a meal.  
 > Example: "After finishing her pasta, she made a scarpetta to savor every bit of the delicious tomato sauce."  
 
-Scarpetta is a simple, cross-platform recipe app written in Flutter.
+Scarpetta is a simple, cross-platform recipe app written in Flutter. You can try it [here](https://philipmuller.github.io/Scarpetta/).
 
 ## Core features
 All users:
