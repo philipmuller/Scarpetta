@@ -1,16 +1,26 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
+  final Function()? onTap;
+  final String? categoryId;
 
-  const RecipeCard({super.key, required this.recipe});
+  const RecipeCard({super.key, required this.recipe, this.onTap, this.categoryId});
 
   @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
       onTap: () {
+        String categoryRoute = "all";
+        if (categoryId != null) {
+          categoryRoute = categoryId!;
+        }
+        onTap?.call();
         GoRouter.of(context).push('/recipes/${recipe.id}');
       },
       child: Container(
@@ -30,9 +40,7 @@ class RecipeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Placeholder(
-              fallbackHeight: 320,
-            ),
+            _recipeImage(context),
             const SizedBox(height: 20.0),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 35.0),
@@ -47,6 +55,16 @@ class RecipeCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _recipeImage(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        child: SCImage(imageUrl: recipe.imageUrl, height: 320),
       ),
     );
   }

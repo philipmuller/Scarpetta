@@ -7,27 +7,27 @@ class RecipeStep {
 
   RecipeStep({required this.description, this.type, this.duration});
 
-  factory RecipeStep.fromJson(Map<String, dynamic> json) {
+  factory RecipeStep.fromMap({required Map<String, dynamic> map}) {
     return RecipeStep(
-      description: json['description'],
-      type: json['type'],
-      duration: json['duration'] != null ? Duration.fromJson(json['duration']) : null,
+      description: map['description'],
+      type: map['type'],
+      duration: map['duration'] != null ? Duration.fromMap(map['duration']) : null,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> map = {
       'description': description,
     };
 
     if (type != null) {
-      json['type'] = type!;
+      map['type'] = type!;
     }
 
     if (duration != null) {
-      json['duration'] = duration!.toJson();
+      map['duration'] = duration!.toMap();
     }
 
-    return json;
+    return map;
   }
 }

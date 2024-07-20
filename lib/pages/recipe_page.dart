@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 
@@ -24,10 +25,7 @@ class RecipePage extends StatelessWidget {
           return SingleChildScrollView(
             child: Column(
               children: [
-                const Placeholder(
-                  fallbackHeight: 400,
-                  fallbackWidth: double.infinity,
-                ),
+                SCImage(imageUrl: recipe.imageUrl, height: 400.0),
                 Padding(
                   padding: EdgeInsets.only(top: topPadding, left: xPadding, right: xPadding, bottom: 30.0),
                   child: Column(
@@ -43,7 +41,10 @@ class RecipePage extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: recipe.ingredients
-                          .map((ingredient) => Text("${ingredient.quantity}${ingredient.unit.abbreviation} ${ingredient.name}"))
+                          .map((ingredient) => Padding(
+                            padding: const EdgeInsets.only(left: 8.0, bottom: 4.0),
+                            child: Text("${ingredient.quantity}${ingredient.unit.abbreviation} ${ingredient.name()}"),
+                          ))
                           .toList(),
                       ),
                       const SizedBox(height: 30.0),
@@ -54,9 +55,21 @@ class RecipePage extends StatelessWidget {
                         children: recipe.steps
                           .asMap()
                           .entries
-                          .map((entry) => ListTile(
-                            title: Text(entry.value.description),
-                            leading: CircleAvatar(child: Text("${entry.key + 1}")),
+                          .map((entry) => Padding(
+                            padding: const EdgeInsets.only(bottom: 18.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CircleAvatar(child: Text("${entry.key + 1}")),
+                                const SizedBox(width: 15.0),
+                                Flexible(
+                                  child: Text(
+                                    entry.value.description,
+                                    softWrap: true,
+                                  ),
+                                ),
+                              ]
+                            ),
                           ))
                           .toList(),
                       ),

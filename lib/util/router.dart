@@ -10,14 +10,18 @@ import 'package:scarpetta/pages/search_page.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/pages/home_page.dart';
 
+final _homeKey = GlobalKey<NavigatorState>();
+final _recipesKey = GlobalKey<NavigatorState>();
+final _profileKey = GlobalKey<NavigatorState>();
+
 final router = GoRouter(
   initialLocation: "/",
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return AdaptiveNavigator(
-          routes: _navigatorTargets, 
-          body: const Text("Hello, World!"), 
+          routes: _navigatorTargets,
+          state: state,
           navigationShell: navigationShell
         );
       },
@@ -39,16 +43,20 @@ final List<NavigatorTarget> _navigatorTargets = [
     label: "Recipes",
   ),
   NavigatorTarget(
-    route: "/calendar", 
-    icon: const PhosphorIcon(PhosphorIconsBold.calendarDots), 
-    label: "Calendar",
+    route: "/profile", 
+    icon: const PhosphorIcon(PhosphorIconsBold.user), 
+    label: "Profile",
     ),
 ];
 
 //these are all branches shown by the Adaptive Navigator
 final _navigatorBranches = [
-  StatefulShellBranch(routes: [
+  StatefulShellBranch(
+    navigatorKey: _homeKey,
+    routes: [
       GoRoute(
+        parentNavigatorKey: _homeKey,
+        name: "home",
         path: '/',
         builder: (context, state) {
           return const HomePage();
@@ -56,40 +64,57 @@ final _navigatorBranches = [
       )
     ],
   ),
-  StatefulShellBranch(routes: [
+  StatefulShellBranch(
+    navigatorKey: _recipesKey,
+    routes: [
       GoRoute(
+        parentNavigatorKey: _recipesKey,
+        name: "recipes",
         path: '/recipes',
         builder: (context, state) {
           return const RecipesPage();
-        }
-      ),
-      GoRoute(
-        path: '/recipes/categories/:name',
-        builder: (context, state) {
-          final categoryName = state.pathParameters['name'] ?? "";
-          return CategoryPage(categoryName: categoryName);
-        }
-      ),
-      GoRoute(
-        path: '/recipes/categories',
-        builder: (context, state) {
-          return const CategoriesPage();
-        }
-      ),
-      GoRoute(
-        path: '/recipes/:id',
-        builder: (context, state) {
-          final id = state.pathParameters['id'] ?? "";
-          return RecipePage(recipeId: id);
-        }
+        },
+        routes: [
+          GoRoute(
+            parentNavigatorKey: _recipesKey,
+            name: "recipe category",
+            path: 'categories/:id',
+            builder: (context, state) {
+              final categoryId = state.pathParameters['id'] ?? "";
+              if (categoryId == "") return const RecipesPage();
+              print("About to show category page with id: $categoryId");
+              return RecipesPage(categoryId: categoryId, key: UniqueKey(),);
+            }
+          ),
+          // GoRoute(
+          //   name: "recipe categories",
+          //   path: '/recipes/categories',
+          //   builder: (context, state) {
+          //     return const CategoriesPage();
+          //   }
+          // ),
+          GoRoute(
+            parentNavigatorKey: _recipesKey,
+            name: "recipe",
+            path: ':id',
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? "";
+              return RecipePage(recipeId: id);
+            }
+          ),
+        ],
       ),
     ],
   ),
-  StatefulShellBranch(routes: [
+  StatefulShellBranch(
+    navigatorKey: _profileKey,
+    routes: [
       GoRoute(
-        path: '/calendar',
+        parentNavigatorKey: _profileKey,
+        name: "profile",
+        path: '/profile',
         builder: (context, state) {
-          return const Text("Calendar");
+          return const Text("Profile page");
         }
       )
     ],
@@ -99,14 +124,4 @@ final _navigatorBranches = [
 //this is the final list of branches that the GoRouter will use
 final _branches = [
   ..._navigatorBranches,
-  StatefulShellBranch(routes: [
-      GoRoute(
-        path: '/search',
-        builder: (context, state) {
-          final query = state.uri.queryParameters['q'] ?? "";
-          return SearchPage(query: query);
-        }
-      )
-    ]
-  )
 ];

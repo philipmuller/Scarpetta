@@ -1,61 +1,86 @@
 import 'package:scarpetta/model/unit.dart';
+import 'package:uuid/uuid.dart';
 
 class Ingredient {
+  String id;
   String name;
   String? description;
   String? imageUrl;
 
-  Ingredient({required this.name, this.description, this.imageUrl});
+  Ingredient({String? id, required this.name, this.description, this.imageUrl}) : id = id ?? const Uuid().v4();
 
-  factory Ingredient.fromJson(Map<String, dynamic> json) {
+  factory Ingredient.fromMap({required Map<String, dynamic> map, String? id}) {
     return Ingredient(
-      name: json['name'],
-      description: json['description'],
-      imageUrl: json['imageUrl'],
+      id: id ?? map['id'],
+      name: map['name'],
+      description: map['description'],
+      imageUrl: map['imageUrl'],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {
+  Map<String, dynamic> toMap({bool includeId = false}) {
+    Map<String, dynamic> map = {
       'name': name,
     };
 
     if (description != null) {
-      json['description'] = description!;
+      map['description'] = description!;
     }
 
     if (imageUrl != null) {
-      json['imageUrl'] = imageUrl!;
+      map['imageUrl'] = imageUrl!;
     }
 
-    return json;
+    if (includeId) {
+      map['id'] = id;
+    }
+
+    return map;
   }
 }
 
-class RecipeIngredient extends Ingredient {
+class RecipeIngredient {
+  Ingredient ingredient;
   double quantity;
   Unit unit;
 
-  RecipeIngredient({required super.name, super.description, super.imageUrl, required this.quantity, required this.unit});
+  String name() => ingredient.name;
+  String? description() => ingredient.description;
+  String? imageUrl() => ingredient.imageUrl;
 
-  factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
-    return RecipeIngredient(
-      name: json['name'],
-      description: json['description'],
-      imageUrl: json['imageUrl'],
-      quantity: json['quantity'],
-      unit: Unit.fromJson(json['unit']),
+  RecipeIngredient({
+    required String name, 
+    String? description, 
+    String? imageUrl, 
+    required this.quantity, 
+    required this.unit}) :
+    ingredient = Ingredient(name: name, description: description, imageUrl: imageUrl);
+
+  RecipeIngredient.fromIngredient({required this.ingredient, required this.quantity, required this.unit});
+
+  factory RecipeIngredient.fromMap({required Map<String, dynamic> map}) {
+    //print("RecipeIngredient.fromMap: $map");
+    final ingredientReference = map['reference'];
+    String? ingredientReferenceId;
+    if (ingredientReference != null) {
+      ingredientReferenceId = ingredientReference.id;
+      //print(ingredientReferenceId);
+    }
+    
+
+    return RecipeIngredient.fromIngredient(
+      ingredient: Ingredient.fromMap(map: map['ingredient'], id: ingredientReferenceId),
+      quantity: map['quantity'],
+      unit: Unit.fromMap(map: map['unit']),
     );
   }
 
-  @override
-  Map<String, dynamic> toJson() {
-    var json = super.toJson();
-
-    json.addAll({
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> json = {
+      'ingredient': ingredient.toMap(),
       'quantity': quantity,
-      'unit': unit.toJson(),
-    });
+      'unit': unit.toMap(),
+    };
 
     return json;
   }

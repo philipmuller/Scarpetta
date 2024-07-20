@@ -29,16 +29,16 @@ class Unit {
 
   Unit({required this.name, required this.abbreviation, this.symbol});
 
-  factory Unit.fromJson(Map<String, dynamic> json) {
-    String abbreviation = json['abbreviation'];
+  factory Unit.fromMap({required Map<String, dynamic> map}) {
+    String abbreviation = map['abbreviation'];
     return Unit(
-      name: json['name'],
+      name: map['name'],
       abbreviation: abbreviation,
       symbol: PhosphorIcon(unitIcons[abbreviation] ?? PhosphorIconsRegular.scales)
     );
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
     'name': name,
     'abbreviation': abbreviation,
   };

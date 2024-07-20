@@ -6,17 +6,17 @@ class Duration {
 
   Duration({required this.value, required this.unit});
 
-  factory Duration.fromJson(Map<String, dynamic> json) {
+  factory Duration.fromMap(Map<String, dynamic> map) {
     return Duration(
-      value: json['value'],
-      unit: Unit.fromJson(json['unit']),
+      value: map['value'],
+      unit: Unit.fromMap(map: map['unit']),
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'value': value,
-      'unit': unit.toJson(),
+      'unit': unit.toMap(),
     };
   }
 }

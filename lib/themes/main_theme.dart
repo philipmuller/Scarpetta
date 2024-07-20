@@ -106,7 +106,8 @@ class MainTheme extends ThemeExtension<MainTheme> {
         indicatorColor: colorScheme.secondaryContainer
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
+        color: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
         foregroundColor: colorScheme.onSurface,
       ),
       chipTheme: ChipThemeData(

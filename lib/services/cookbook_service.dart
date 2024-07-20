@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/model/ingredient.dart';
 import 'package:scarpetta/model/unit.dart';
@@ -5,31 +7,83 @@ import 'package:scarpetta/model/recipe_step.dart';
 import 'package:scarpetta/model/duration.dart';
 
 class CookbookService {
+
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   static Future<Recipe?> getRecipe(String id) async {
-    try {
-      return mockRecipes.firstWhere((recipe) => recipe.id == id);
-    } catch (e) {
-      return null;
+    final recipeMap = await _firestore.collection('recipes').doc(id).get();
+    if (!recipeMap.exists) return null;
+    return Recipe.fromMap(map: recipeMap.data()!, id: recipeMap.id);
+  }
+
+  static Future<Recipe> getFeaturedRecipe() async {
+    final recipes = await CookbookService.getRecipes();
+    if (recipes.isEmpty) return mockRecipes[0];
+    return recipes[0];
+  }
+
+  static Future<List<Recipe>> getRecipes({String? categoryId}) async {
+    //print("Retreiving recipes...");
+    QuerySnapshot<Map<String, dynamic>> snapshot;
+    if (categoryId == null) {
+      snapshot = await _firestore.collection('recipes').get();
+    } else {
+      final category = await _firestore.collection('categories').doc(categoryId).get();
+      snapshot = await _firestore.collection('recipes')
+        .where('categories', arrayContains: category.data()!['name'])
+        .get();
     }
+    final recipes = snapshot.docs.map((doc) {
+      //print(doc.data());
+      final recipe = Recipe.fromMap(map: doc.data(), id: doc.id);
+      return recipe;
+    }).toList();
+
+    //print("Recipes retreived: $recipes");
+
+    return recipes;
   }
 
-  static Future<Recipe> featuredRecipe() async {
-    return mockRecipes[1];
+  static Future<List<Category>> getCategories() async {
+    //print("Retreiving categories...");
+    final snapshot = await _firestore.collection('categories').get();
+
+    final categories = snapshot.docs.map((doc) {
+      final category = Category.fromMap(map: doc.data(), id: doc.id);
+      //print(category.name);
+      return category;
+    }).toList();
+
+    //print("Categories retreived: $categories");
+    return categories;
   }
 
-  static Future<List<Recipe>> recipes() async {
-    return mockRecipes;
+  static Future<Category> getCategory(String id) async {
+    //print("Retreiving categories...");
+    final snapshot = await _firestore.collection('categories').doc(id).get();
+    final category = Category.fromMap(map: snapshot.data()!, id: snapshot.id);
+
+    //print("Categories retreived: $categories");
+    return category;
   }
 
-  static Future<List<String>> categories() async {
-    return mockCategories;
+  static Stream<List<Recipe>> findRecipes(String query) {
+    final stream = _firestore
+        .collection('recipes')
+        .where('name', isGreaterThanOrEqualTo: query)
+        .where('name', isLessThanOrEqualTo: query + '\uf8ff')
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => Recipe.fromMap(map: doc.data(), id: doc.id)).toList());
+
+    return stream;
   }
+
 }
 
 final mockRecipes = [
   Recipe(
-    name: "Spaghetti Carbonara",
-    description: "Spaghetti Carbonara is a classic Italian pasta dish that's creamy, rich, and easy to make! The authentic recipe calls for eggs, pancetta, cheese, and pepper. So simple, so easy!",
+    name: "Pasta Carbonara",
+    description: "Pasta Carbonara is a classic Italian pasta dish that's creamy, rich, and easy to make! The authentic recipe calls for eggs, pancetta, cheese, and pepper. So simple, so easy!",
     ingredients: [
       RecipeIngredient(name: "Spaghetti", quantity: 200, unit: Unit.gram),
       RecipeIngredient(name: "Eggs", quantity: 2, unit: Unit.unit),

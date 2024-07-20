@@ -28,5 +28,6 @@ TODO: Brief description of the application
 TODO: 3 key challenges faced during the project
 
 TODO: 3 key learning moments from working on the project
+I learned about normalization in Firestore, which I hate with burning passion.
 
 TODO: list of dependencies and their versions (from pubspec.yaml)
