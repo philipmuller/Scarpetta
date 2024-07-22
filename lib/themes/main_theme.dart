@@ -74,7 +74,8 @@ class MainTheme extends ThemeExtension<MainTheme> {
       useMaterial3: true,
       textTheme: textTheme.apply(
         displayColor: colorScheme.onSurface,
-        bodyColor: colorScheme.onSurface
+        bodyColor: colorScheme.onSurface,
+        decorationColor: colorScheme.onSurface,
       ),
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
@@ -94,6 +95,17 @@ class MainTheme extends ThemeExtension<MainTheme> {
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: colorScheme.secondaryContainer,
         foregroundColor: colorScheme.onSecondaryContainer
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colorScheme.secondaryContainer,
+          foregroundColor: colorScheme.onSecondaryContainer,
+          shadowColor: colorScheme.shadow,
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30)
+          )
+        )
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: colorScheme.surface,

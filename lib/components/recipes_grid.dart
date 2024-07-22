@@ -7,9 +7,8 @@ class RecipesGrid extends StatelessWidget {
   final List<Recipe> recipes;
   final EdgeInsets? padding;
   final Function()? onRecipeTap;
-  final String? categoryId;
 
-  const RecipesGrid({super.key, required this.recipes, this.padding, this.onRecipeTap, this.categoryId});
+  const RecipesGrid({super.key, required this.recipes, this.padding, this.onRecipeTap});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +37,7 @@ class RecipesGrid extends StatelessWidget {
       ),
       padding: padding,
       children: recipes.map((recipe) {
-        return RecipeCard(recipe: recipe, onTap: onRecipeTap, categoryId: categoryId);
+        return RecipeCard(recipe: recipe, onTap: onRecipeTap);
       }).toList(),
     );
   }

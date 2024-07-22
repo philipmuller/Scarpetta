@@ -8,9 +8,8 @@ import 'package:scarpetta/util/breakpoint.dart';
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
   final Function()? onTap;
-  final String? categoryId;
 
-  const RecipeCard({super.key, required this.recipe, this.onTap, this.categoryId});
+  const RecipeCard({super.key, required this.recipe, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +29,6 @@ class RecipeCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        String categoryRoute = "all";
-        if (categoryId != null) {
-          categoryRoute = categoryId!;
-        }
         onTap?.call();
         GoRouter.of(context).push('/recipes/${recipe.id}');
       },

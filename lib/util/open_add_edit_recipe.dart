@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:scarpetta/model/category.dart';
+import 'package:scarpetta/model/recipe.dart';
+import 'package:scarpetta/pages/add_edit_recipe_page.dart';
 import 'package:scarpetta/pages/categories_page.dart';
 
-void openCategories({required BuildContext context, bool isMobile = true, Function(Category)? onCategoryTap, bool push = true}) {
+void openAddEditRecipe({required BuildContext context, bool isMobile = false, Recipe? recipeToEdit, Function(Recipe)? onSubmit}) {
   if (isMobile) {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -13,7 +14,7 @@ void openCategories({required BuildContext context, bool isMobile = true, Functi
       enableDrag: true,
       showDragHandle: true,
       context: context, 
-      builder: (context) => _modalBuilder(context, onCategoryTap: onCategoryTap, push: push),
+      builder: (context) => _modalBuilder(context, recipeToEdit: recipeToEdit, onSubmit: onSubmit),
     );
   } else {
     showDialog(
@@ -26,8 +27,8 @@ void openCategories({required BuildContext context, bool isMobile = true, Functi
             borderRadius: BorderRadius.circular(20.0),
           ),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 800),
-            child: _modalBuilder(context, onCategoryTap: onCategoryTap, push: push)
+            constraints: BoxConstraints(maxWidth: 800),
+            child: _modalBuilder(context, recipeToEdit: recipeToEdit, onSubmit: onSubmit)
           ),
         );
       },
@@ -35,12 +36,10 @@ void openCategories({required BuildContext context, bool isMobile = true, Functi
   }
 }
 
-Widget _modalBuilder(BuildContext context, {Function(Category)? onCategoryTap, required bool push}) {
-  return CategoriesPage(
+Widget _modalBuilder(BuildContext context, {Recipe? recipeToEdit, Function(Recipe)? onSubmit}) {
+  return AddEditRecipePage(
     key: UniqueKey(),
-    onCategoryTap: (category) {
-      onCategoryTap?.call(category);
-    },
-    push: push,
+    recipeToEdit: recipeToEdit,
+    onSubmit: onSubmit,
   );
 }

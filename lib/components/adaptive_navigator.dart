@@ -2,6 +2,7 @@
 
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
@@ -13,6 +14,7 @@ import 'package:scarpetta/util/breakpoint.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scarpetta/util/navigator_target.dart';
 import 'package:scarpetta/components/search_bar.dart';
+import 'package:scarpetta/util/open_add_edit_recipe.dart';
 import 'package:scarpetta/util/sc_search_delegate.dart';
 
 class AdaptiveNavigator extends StatefulWidget {
@@ -33,6 +35,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
   bool _canPop = false;
   bool _isShowingAllRecipes = false;
   final _pageTitles = ["Home", "Recipes", "Profile"];
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
@@ -44,16 +47,17 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     GoRouter.of(context).routeInformationProvider.addListener(_handleRouteChange);
     GoRouter.of(context).routerDelegate.addListener(_handleRouteChange);
     //GoRouter.of(context).routeInformationProvider.didPopRoute();
 
     if (width >= Breakpoint.lg) {
-      return desktopLayout();
+      return _desktopLayout();
     }
 
     if (width >= Breakpoint.md) {
-      return _tabletLayout();
+      return _tabletLayout(height);
     }
 
     return _mobileLayout();
@@ -61,7 +65,8 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
 
   Widget _mobileLayout() {
     return Scaffold(
-        appBar: _appBar(),
+        appBar: _appBar(false),
+        floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton(false) : null,
         extendBodyBehindAppBar: true,
         body: widget.navigationShell,
         bottomNavigationBar: NavigationBar(
@@ -82,16 +87,27 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     );
   }
 
-  Widget _tabletLayout() {
+  Widget _tabletLayout(double height) {
     bool extendedRail = false;
     
     return Row(
       children: [
         NavigationRail(
           selectedIndex: _selectedIndex,
-          groupAlignment: 0.0,
+          groupAlignment: -1.0,
           extended: extendedRail,
           minWidth: 100,
+          leading: SizedBox(height: height/2.4,),
+          trailing: Expanded(
+            child: Column(
+              children: [
+                const Spacer(flex: 2),
+                if (FirebaseAuth.instance.currentUser != null)
+                  _addRecipeButton(false),
+                SizedBox(height: 20.0)
+              ],
+            ),
+          ),
           onDestinationSelected: (index) {
             context.go(widget.routes[index].route);
             setState(() {
@@ -109,7 +125,8 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         //const VerticalDivider(thickness: 1, width: 1),
         Expanded(
           child: Scaffold(
-            appBar: _appBar(),
+            appBar: _appBar(false),
+            //floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton() : null,
             extendBodyBehindAppBar: true,
             body: widget.navigationShell,
           ),
@@ -118,11 +135,12 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     );
   }
 
-  Widget desktopLayout() {
+  Widget _desktopLayout() {
     return Row(
       children: [
         NavigationDrawer(
           selectedIndex: _selectedIndex,
+          tilePadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
           onDestinationSelected: (index) {
             context.go(widget.routes[index].route);
             setState(() {
@@ -134,19 +152,26 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
               padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20),
               child: Text("Scarpetta", style: Theme.of(context).textTheme.displayMedium!.copyWith(color: Theme.of(context).colorScheme.primary)),
             ),
-            //const SizedBox(height: 50),
+            SizedBox(height: 20.0),
             ...widget.routes.map((route) {
               return NavigationDrawerDestination(
                 icon: route.icon,
                 label: Text(route.label),
               );
-            }).toList()
+            }).toList(),
+            if (FirebaseAuth.instance.currentUser != null)
+              Padding(
+                padding: EdgeInsets.only(left: 20.0, right: 20.0, top: MediaQuery.of(context).size.height - 430,),
+                child: _addRecipeButton(true),
+              ),
+            SizedBox(height: 20.0)
           ],
         ),
         //const VerticalDivider(thickness: 1, width: 1),
         Expanded(
           child: Scaffold(
-            appBar: _appBar(),
+            appBar: _appBar(true),
+            //floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton() : null,
             extendBodyBehindAppBar: true,
             body: widget.navigationShell,
           ),
@@ -155,13 +180,37 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     );
   }
 
-  AppBar _appBar() {
+  FloatingActionButton _addRecipeButton(bool extended) {
+    double width = MediaQuery.of(context).size.width;
+    bool isMobile = width < Breakpoint.md;
+    if (extended) {
+      return FloatingActionButton.extended(
+        onPressed: () {
+          openAddEditRecipe(context: context, isMobile: isMobile);
+        }, 
+        label: const Text('Add Recipe'),
+        icon: const PhosphorIcon(PhosphorIconsRegular.plus),
+      );
+    }
+
+    return FloatingActionButton(
+      onPressed: () {
+        openAddEditRecipe(context: context, isMobile: isMobile);
+      }, 
+      child: const PhosphorIcon(PhosphorIconsRegular.plus),
+    );
+  }
+
+  AppBar _appBar(bool isDesktop) {
     return AppBar(
-      automaticallyImplyLeading: true,
+      //automaticallyImplyLeading: true,
       title: !_isShowingRecipe 
-      ? Text(_pageTitles[_selectedIndex])
+      ? Padding(
+        padding: EdgeInsets.only(left: isDesktop ? 0 : 20),
+        child: Text(_pageTitles[_selectedIndex]),
+      )
       : null,
-      centerTitle: true,
+      centerTitle: isDesktop ? true : false,
       flexibleSpace: !_isShowingRecipe
       ? ClipRect(
         child: BackdropFilter(
@@ -194,6 +243,26 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
           children: [
             _iconBackground(),
             IconButton(
+              icon: FirebaseAuth.instance.currentUser == null 
+              ? const PhosphorIcon(PhosphorIconsRegular.signIn) 
+              : const PhosphorIcon(PhosphorIconsRegular.signOut),
+              onPressed: () {
+                if (FirebaseAuth.instance.currentUser == null) {
+                  FirebaseAuth.instance.signInAnonymously();
+                } else {
+                  FirebaseAuth.instance.signOut();
+                }
+                
+              },
+            ),
+          ],
+        ),
+        SizedBox(width: 5.0),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            _iconBackground(),
+            IconButton(
               icon: const PhosphorIcon(PhosphorIconsRegular.magnifyingGlass),
               onPressed: () {
                 showSearch(context: context, delegate: SCSearchDelegate());
@@ -201,6 +270,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
             ),
           ],
         ),
+        SizedBox(width: 20.0),
       ],
     );
   }
@@ -248,7 +318,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         _isShowingRecipe = false;
       }
 
-      if (route != "/" && route != "/recipes" && !route.contains("/recipes/categories/") && route != "/profile" && route != "") {
+      if (route != "/" && route != "/recipes" && !route.contains("/recipes/categories/") && route != "/profile" && route != "" && route != "/login") {
         _isRootNode = false;
       } else {
         _isRootNode = true;
@@ -283,6 +353,10 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     }
 
     if (id!.contains("profile")) {
+      return 2;
+    }
+
+    if (id!.contains("login")) {
       return 2;
     }
 

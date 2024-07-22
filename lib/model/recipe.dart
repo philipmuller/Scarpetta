@@ -1,22 +1,27 @@
+import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/ingredient.dart';
 import 'package:scarpetta/model/recipe_step.dart';
 import 'package:uuid/uuid.dart';
 
 class Recipe {
   final String id;
+  final String? authorId;
   final String name;
   final String description;
   final String? imageUrl;
   final List<RecipeIngredient> ingredients;
   final List<RecipeStep> steps;
+  final List<Category> categories;
 
   Recipe({
     String? id,
+    this.authorId,
     required this.name,
     required this.description,
     this.imageUrl,
     this.ingredients = const [],
     this.steps = const [],
+    this.categories = const [],
   }) :
     id = id ?? const Uuid().v4();
 
@@ -34,13 +39,21 @@ class Recipe {
       stepsList = (stepsMapList as List).map((step) => RecipeStep.fromMap(map: step)).toList();
     }
 
+    List<Category> categoriesList = [];
+    final categoriesStringList = map['categories'];
+    if (categoriesStringList != null && categoriesStringList.isNotEmpty) {
+      categoriesList = (categoriesStringList as List).map((categoryName) => Category(name: categoryName)).toList();
+    }
+
     return Recipe(
       id: id ?? map['id'],
+      authorId: map['authorId'],
       name: map['name'],
       description: map['description'],
       imageUrl: map['imageUrl'],
       ingredients: ingredientsList,
       steps: stepsList,
+      categories: categoriesList,
     );
   }
 
@@ -50,10 +63,15 @@ class Recipe {
       'description': description,
       'ingredients': ingredients.map((ingredient) => ingredient.toMap()).toList(),
       'steps': steps.map((step) => step.toMap()).toList(),
+      'categories': categories.map((category) => category.name).toList(),
     };
 
     if (imageUrl != null) {
       map['imageUrl'] = imageUrl!;
+    }
+
+    if (authorId != null) {
+      map['authorId'] = authorId!;
     }
 
     if (includeId) {

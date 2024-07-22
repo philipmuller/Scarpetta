@@ -19,10 +19,12 @@ class CategoryIndicator extends StatelessWidget {
       onTap: () {
         onTap?.call(category);
         if (push) {
+          print("PUSH IS TRUE");
           print("About to push to /recipes/categories/${category.id}");
+          if (context.canPop()) {
+            context.pop();
+          }
           context.replace("/recipes/categories/${category.id}");
-        } else {
-          //GoRouter.of(context).go('/recipes/${category.id}');
         }
       },
       child: Column(

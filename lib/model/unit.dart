@@ -23,11 +23,11 @@ final Map<String, PhosphorFlatIconData> unitIcons = {
 };
 
 class Unit {
-  String name;
+  String? name;
   String abbreviation;
   PhosphorIcon? symbol;
 
-  Unit({required this.name, required this.abbreviation, this.symbol});
+  Unit({this.name, required this.abbreviation, this.symbol});
 
   factory Unit.fromMap({required Map<String, dynamic> map}) {
     String abbreviation = map['abbreviation'];

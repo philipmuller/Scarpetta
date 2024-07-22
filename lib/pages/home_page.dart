@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/components/featured_card.dart';
@@ -6,6 +7,7 @@ import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/categories_page.dart';
+import 'package:scarpetta/providers&state/cookbook_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
@@ -19,14 +21,16 @@ final mockCategories = [
   "Drinks",
 ];
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   final double topPadding = 65.0;
   final double xPadding = 30.0;
 
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(cookbookProvider);
+
     double width = MediaQuery.of(context).size.width;
     bool mobileModal = true;
     bool isDesktop = false;
@@ -60,7 +64,10 @@ class HomePage extends StatelessWidget {
                         return;
                       }
 
-                      openCategories(context, mobileModal);
+                      openCategories(
+                        context: context, 
+                        isMobile: mobileModal, 
+                      );
                     },
                     child: const Text("See all"),
                   ),
@@ -72,23 +79,19 @@ class HomePage extends StatelessWidget {
               clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(left: 8.0),
-              child: FutureBuilder(
-                future: CookbookService.getCategories(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  return Row(
-                    children: snapshot.data!
-                      .take(isDesktop ? 10 : 6)
-                      .map((category) => Padding(
-                        padding: const EdgeInsets.only(right: 10.0),
-                        child: CategoryIndicator(category: category, push: true,),
-                      ))
-                      .toList()
-                  );
-                }
-              ),
+              child: state.when(
+                data: (state) => Row(
+                  children: state.categories
+                    .take(isDesktop ? 10 : 6)
+                    .map((category) => Padding(
+                      padding: const EdgeInsets.only(right: 10.0),
+                      child: CategoryIndicator(category: category, push: true,),
+                    ))
+                    .toList()
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(child: Text('Error: $error')),
+              ), 
             )
           ],
         ),

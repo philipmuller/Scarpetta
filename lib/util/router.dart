@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:scarpetta/pages/categories_page.dart';
-import 'package:scarpetta/pages/category_page.dart';
+import 'package:scarpetta/pages/login_page.dart';
+import 'package:scarpetta/pages/profile_page.dart';
 import 'package:scarpetta/pages/recipe_page.dart';
 import 'package:scarpetta/components/adaptive_navigator.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +15,7 @@ import 'package:scarpetta/pages/home_page.dart';
 final _homeKey = GlobalKey<NavigatorState>();
 final _recipesKey = GlobalKey<NavigatorState>();
 final _profileKey = GlobalKey<NavigatorState>();
+bool _isLoggedIn = false;
 
 final router = GoRouter(
   initialLocation: "/",
@@ -27,7 +30,16 @@ final router = GoRouter(
       },
       branches: _branches
     )
-  ]
+  ],
+  redirect: (context, state) {
+    print("Redirect called ${state.uri.path}");
+    if (FirebaseAuth.instance.currentUser == null && state.uri.path == "/profile") {
+      return "/login";
+    }
+    if (FirebaseAuth.instance.currentUser != null && state.uri.path == "/login") {
+      return "/profile";
+    }
+  },
 );
 
 //navigator targets are compact data classes that hold the route, icon, and label for each navigation item displayed by the Adaptive Navigator
@@ -114,7 +126,15 @@ final _navigatorBranches = [
         name: "profile",
         path: '/profile',
         builder: (context, state) {
-          return const Text("Profile page");
+          return ProfilePage();
+        }
+      ),
+      GoRoute(
+        parentNavigatorKey: _profileKey,
+        name: "login",
+        path: '/login',
+        builder: (context, state) {
+          return LoginPage();
         }
       )
     ],

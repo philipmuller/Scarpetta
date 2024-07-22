@@ -22,6 +22,14 @@ class CookbookService {
     return recipes[0];
   }
 
+  static addRecipe(Recipe recipe) async {
+    await FirebaseFirestore.instance.collection('recipes').add(recipe.toMap(includeId: false));
+  }
+
+  static updateRecipe({required Recipe recipe, String? id}) async {
+    await FirebaseFirestore.instance.collection('recipes').doc(id ?? recipe.id).update(recipe.toMap(includeId: false));
+  }
+
   static Future<List<Recipe>> getRecipes({String? categoryId}) async {
     //print("Retreiving recipes...");
     QuerySnapshot<Map<String, dynamic>> snapshot;
