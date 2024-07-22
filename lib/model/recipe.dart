@@ -80,4 +80,26 @@ class Recipe {
 
     return map;
   }
+
+  Recipe copyWith({
+    String? id,
+    String? authorId,
+    String? name,
+    String? description,
+    String? imageUrl,
+    List<RecipeIngredient>? ingredients,
+    List<RecipeStep>? steps,
+    List<Category>? categories,
+  }) {
+    return Recipe(
+      id: id ?? this.id,
+      authorId: authorId ?? this.authorId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+      ingredients: ingredients ?? this.ingredients,
+      steps: steps ?? this.steps,
+      categories: categories ?? this.categories,
+    );
+  }
 }

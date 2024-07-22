@@ -7,7 +7,8 @@ import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/categories_page.dart';
-import 'package:scarpetta/providers&state/cookbook_provider.dart';
+import 'package:scarpetta/providers&state/categories_provider.dart';
+import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
@@ -29,7 +30,9 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(cookbookProvider);
+    final categories = ref.watch(categoriesProvider);
+    final recipes = ref.watch(recipesProvider);
+    final featuredRecipe = recipes.value?[0];
 
     double width = MediaQuery.of(context).size.width;
     bool mobileModal = true;
@@ -49,7 +52,7 @@ class HomePage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FeaturedCard(recipe: CookbookService.getFeaturedRecipe()),
+            FeaturedCard(recipe: featuredRecipe ?? Recipe(name: "Loading...", description: "Loading...")),
             const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -79,9 +82,9 @@ class HomePage extends ConsumerWidget {
               clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(left: 8.0),
-              child: state.when(
+              child: categories.when(
                 data: (state) => Row(
-                  children: state.categories
+                  children: state
                     .take(isDesktop ? 10 : 6)
                     .map((category) => Padding(
                       padding: const EdgeInsets.only(right: 10.0),

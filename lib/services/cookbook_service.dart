@@ -11,36 +11,88 @@ class CookbookService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static Future<Recipe?> getRecipe(String id) async {
+    print("CookbookService.getRecipe($id)");
     final recipeMap = await _firestore.collection('recipes').doc(id).get();
     if (!recipeMap.exists) return null;
     return Recipe.fromMap(map: recipeMap.data()!, id: recipeMap.id);
   }
 
+  static deleteRecipe(String id) async {
+    print("CookbookService.deleteRecipe($id)");
+    await _firestore.collection('recipes').doc(id).delete();
+  }
+
   static Future<Recipe> getFeaturedRecipe() async {
+    print("CookbookService.getFeaturedRecipe()");
     final recipes = await CookbookService.getRecipes();
     if (recipes.isEmpty) return mockRecipes[0];
     return recipes[0];
   }
 
+  static favouriteRecipe(String userId, String recipeId) async {
+    print("CookbookService.favouriteRecipe($userId)");
+    final user = await _getUserInformation(userId);
+    user.reference.update({
+      'favourites': FieldValue.arrayUnion([recipeId])
+    });
+  }
+
+  static unFavouriteRecipe(String userId, String recipeId) async {
+    print("CookbookService.favouriteRecipe($userId)");
+    final user = await _getUserInformation(userId);
+    user.reference.update({
+      'favourites': FieldValue.arrayRemove([recipeId])
+    });
+  }
+
+  static Future<DocumentSnapshot<Map<String, dynamic>>> _getUserInformation(String userId) async {
+    print("CookbookService._getUserInformation($userId)");
+    DocumentSnapshot<Map<String, dynamic>> user = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    if (user.exists == false) {
+      await FirebaseFirestore.instance.collection('users').doc(userId).set({
+        'favourites': [],
+        'creations': [],
+      });
+      user = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    }
+    return user;
+  }
+
+  static Future<Map<String, dynamic>> getUserInformation(String userId) async {
+    print("CookbookService.getUserInformation($userId)");
+    final user = await _getUserInformation(userId);
+    return user.data()!;
+  }
+
   static addRecipe(Recipe recipe) async {
-    await FirebaseFirestore.instance.collection('recipes').add(recipe.toMap(includeId: false));
+    print("CookbookService.addRecipe($recipe)");
+    final newRecipe = await FirebaseFirestore.instance.collection('recipes').add(recipe.toMap(includeId: false));
+    if (recipe.authorId == null) return;
+
+    final user = await _getUserInformation(recipe.authorId!);
+    print(user.data());
+    user.reference.update({
+      'creations': FieldValue.arrayUnion([newRecipe.id])
+    });
   }
 
   static updateRecipe({required Recipe recipe, String? id}) async {
+    print("CookbookService.updateRecipe($recipe, $id)");
     await FirebaseFirestore.instance.collection('recipes').doc(id ?? recipe.id).update(recipe.toMap(includeId: false));
   }
 
-  static Future<List<Recipe>> getRecipes({String? categoryId}) async {
+  static Future<List<Recipe>> getRecipes({String? categoryId, String? authorId, List<String>? favouritedByUser}) async {
+    print("CookbookService.getRecipes($categoryId)");
     //print("Retreiving recipes...");
-    QuerySnapshot<Map<String, dynamic>> snapshot;
-    if (categoryId == null) {
-      snapshot = await _firestore.collection('recipes').get();
-    } else {
-      final category = await _firestore.collection('categories').doc(categoryId).get();
-      snapshot = await _firestore.collection('recipes')
-        .where('categories', arrayContains: category.data()!['name'])
-        .get();
-    }
+    Query<Map<String, dynamic>> query;
+    final category = await _firestore.collection('categories').doc(categoryId).get();
+
+    query = _firestore.collection('recipes').where('name', isGreaterThanOrEqualTo: '');
+    if (categoryId != null) query = query.where('categories', arrayContains: category.data()!['name']);
+    if (authorId != null) query = query.where('authorId', isEqualTo: authorId);
+    if (favouritedByUser != null) query = query.where(FieldPath.documentId, whereIn: favouritedByUser);
+    final snapshot = await query.get();
+
     final recipes = snapshot.docs.map((doc) {
       //print(doc.data());
       final recipe = Recipe.fromMap(map: doc.data(), id: doc.id);
@@ -53,6 +105,7 @@ class CookbookService {
   }
 
   static Future<List<Category>> getCategories() async {
+    print("CookbookService.getCategories()");
     //print("Retreiving categories...");
     final snapshot = await _firestore.collection('categories').get();
 
@@ -67,15 +120,18 @@ class CookbookService {
   }
 
   static Future<Category> getCategory(String id) async {
+    print("CookbookService.getCategory($id)");
     //print("Retreiving categories...");
     final snapshot = await _firestore.collection('categories').doc(id).get();
     final category = Category.fromMap(map: snapshot.data()!, id: snapshot.id);
+    print(category);
 
     //print("Categories retreived: $categories");
     return category;
   }
 
   static Stream<List<Recipe>> findRecipes(String query) {
+    print("CookbookService.findRecipes($query)");
     final stream = _firestore
         .collection('recipes')
         .where('name', isGreaterThanOrEqualTo: query)

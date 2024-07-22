@@ -1,30 +1,83 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 
-class RecipesNotifier extends StateNotifier<List<Recipe>> {
-  RecipesNotifier() : super([]) {
-    fetchRecipes(null);
+class RecipesNotifier extends AsyncNotifier<List<Recipe>> {
+
+  List<Recipe> cachedRecipes = [];
+  
+  @override
+  Future<List<Recipe>> build() async {
+    print("RecipesNotifier build()");
+    final recipes = await CookbookService.getRecipes();
+    cachedRecipes = recipes;
+    return recipes;
   }
 
-  void fetchRecipes(String? categoryId) async {
-    final recipes = await CookbookService.getRecipes(categoryId: categoryId);
-    state = recipes;
+  filterByCategory(String? id) async {
+    print("RecipesNotifier filterByCategory($id)");
+    if (id == null) {
+      state = AsyncValue.data(cachedRecipes);
+      print("Served cached recipes");
+      return;
+    }
+    final category = await CookbookService.getCategory(id);
+    print("category: $category");
+    state = AsyncValue.data(
+      cachedRecipes // List<Recipe>
+      .where(
+        (recipe) => recipe.categories // List<Category>
+        .where(
+          (cachedCategory) => category.name == cachedCategory.name
+        )
+        .isNotEmpty
+      ).toList()
+    );
   }
 
-  void addRecipe(Recipe recipe) async {
-    state = [recipe, ...state];
+  Recipe? recipeWithId(String id) {
+    print("RecipesNotifier recipeWithId($id)");
+    return state.value!.firstWhere((element) => element.id == id, orElse: () => Recipe(name: "Not found", description: "The recipe was not found"));
+  }
+
+  updateRecipe({required Recipe updatedRecipe, String? id}) async {
+    print("RecipesNotifier updateRecipe($updatedRecipe, $id)");
+    final finalId = id ?? updatedRecipe.id;
+    print("finalId: $finalId");
+    final updatedRecipes = cachedRecipes.map((element) => element.id == finalId ? updatedRecipe : element).toList();
+    print(updatedRecipes);
+    cachedRecipes = updatedRecipes;
+    state = AsyncValue.data(updatedRecipes);
+    await CookbookService.updateRecipe(recipe: updatedRecipe, id: finalId);
+  }
+
+  deleteRecipe({required String id}) async {
+    print("RecipesNotifier deleteRecipe($id)");
+    final updatedRecipes = cachedRecipes.where((element) => element.id != id).toList();
+    cachedRecipes = updatedRecipes;
+    state = AsyncValue.data(updatedRecipes);
+    await CookbookService.deleteRecipe(id);
+  }
+
+  fetchRecipes() async {
+    print("RecipesNotifier fetchRecipes()");
+    final recipes = await CookbookService.getRecipes();
+    cachedRecipes = recipes;
+    state = AsyncValue.data(recipes);
+  }
+
+  addRecipe(Recipe recipe) async {
+    print("RecipesNotifier addRecipe($recipe)");
+    state = AsyncValue.data([recipe, ...state.value!]);
     await CookbookService.addRecipe(recipe);
+    await fetchRecipes();
   }
-
-  void updateRecipe({required Recipe recipe, String? id}) async {
-    final index = state.indexWhere((element) => element.id == (id ?? recipe.id));
-    state[index] = recipe;
-    await CookbookService.updateRecipe(recipe: recipe, id: id);
-  }
+  
 }
 
-final recipesProvider = FutureProvider<List<Recipe>>((ref) async {
-  final recipes = await CookbookService.getRecipes();
-  return recipes;
+final recipesProvider = AsyncNotifierProvider<RecipesNotifier, List<Recipe>>(() {
+  return RecipesNotifier();
 });

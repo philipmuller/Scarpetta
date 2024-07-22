@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:scarpetta/components/recipes_grid.dart';
+import 'package:scarpetta/pages/my_favourites_page.dart';
+import 'package:scarpetta/pages/my_recipes_page.dart';
+import 'package:scarpetta/pages/recipes_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Tab Page'),
-          bottom: TabBar(
+          bottom: const TabBar(
             tabs: [
-              Tab(text: 'Tab 1'),
-              Tab(text: 'Tab 2'),
-              Tab(text: 'Tab 3'),
+              Tab(text: 'My Recipes', icon: PhosphorIcon(PhosphorIconsRegular.chefHat),),
+              Tab(text: 'Favourites', icon: PhosphorIcon(PhosphorIconsRegular.star)),
             ],
           ),
         ),
-        body: TabBarView(
+        body: const TabBarView(
           children: [
-            Center(child: Text('Content of Tab 1')),
-            Center(child: Text('Content of Tab 2')),
-            Center(child: Text('Content of Tab 3')),
+            //RecipesGrid(recipes: recipes),
+            MyRecipesPage(),
+            MyFavouritesPage(),
           ],
         ),
       ),

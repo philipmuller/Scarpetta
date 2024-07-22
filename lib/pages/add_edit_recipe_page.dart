@@ -106,6 +106,8 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
       print("Form validation passed");
 
       _formKey.currentState!.save();
+
+      print("Form saved");
       
       _ingredients = _ingredientControllers.map((ingredientControllers){
         return RecipeIngredient(
@@ -115,13 +117,17 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
         );
       }).toList();
 
+      print("ingredients $_ingredients");
+
       _steps = _stepControllers.map((stepController){
         return RecipeStep(
           description: stepController!.text,
         );
       }).toList();
 
-      final recipe = Recipe(
+      print("steps $_steps");
+
+      final newRecipe = Recipe(
         name: _name,
         authorId: FirebaseAuth.instance.currentUser?.uid,
         description: _description,
@@ -129,21 +135,21 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
         steps: _steps,
         categories: _categories,
       );
+      
+      print("New recipe $newRecipe");
 
       if (widget.onSubmit != null) {
-        widget.onSubmit!(recipe);
-      }
+        if (widget.recipeToEdit != null) {
+          widget.onSubmit!(newRecipe.copyWith(
+            id: widget.recipeToEdit!.id,
+            imageUrl: widget.recipeToEdit!.imageUrl,
+            authorId: widget.recipeToEdit!.authorId,
+          ));
+        } else {
+          widget.onSubmit!(newRecipe);
+        }
 
-      if (widget.recipeToEdit != null) {
-        // Provider((ref) {
-        //   ref.read(recipesProvider.notifier).updateRecipe(recipe: recipe, id: widget.recipeToEdit!.id);
-        // });
-        //await FirebaseFirestore.instance.collection('recipes').doc(widget.recipeToEdit!.id).update(recipe.toMap(includeId: false));
-      } else {
-        // Provider((ref) {
-        //   ref.read(recipesProvider.notifier).addRecipe(recipe);
-        // });
-        //await FirebaseFirestore.instance.collection('recipes').add(recipe.toMap(includeId: false));
+        context.pop();
       }
 
     } else {
@@ -178,7 +184,6 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           _submitForm();
-          Navigator.pop(context);
         }, 
         icon: const PhosphorIcon(PhosphorIconsRegular.check),
         label: const Text('Save Recipe'),

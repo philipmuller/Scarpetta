@@ -7,29 +7,45 @@ import 'package:scarpetta/components/recipes_grid.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/categories_page.dart';
-import 'package:scarpetta/providers&state/cookbook_provider.dart';
-import 'package:scarpetta/providers&state/cookbook_state.dart';
-import 'package:scarpetta/providers&state/recipe_provider.dart';
+import 'package:scarpetta/providers&state/categories_provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
+import 'package:scarpetta/providers&state/selected_category_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/components/recipe_card.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
 
-class RecipesPage extends ConsumerWidget {
-  final double topPadding = 55.0;
-  final double xPadding = 30.0;
+class RecipesPage extends ConsumerStatefulWidget {
   final String? categoryId;
 
   const RecipesPage({super.key, this.categoryId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Category? category = null;
-    final state = ref.watch(cookbookProvider);
-    if (categoryId != null) {
-      ref.read(cookbookProvider.notifier).filterByCategory(categoryId!);
-    }
+  ConsumerState<RecipesPage> createState() => _RecipesPageState();
+}
+
+class _RecipesPageState extends ConsumerState<RecipesPage> {
+  final double topPadding = 55.0;
+  final double xPadding = 30.0;
+
+  @override
+  void initState() {
+    print("STATE RELOADED");
+    super.initState();
+    Future.microtask(() async {
+      ref.read(recipesProvider.notifier).fetchRecipes();
+      ref.read(recipesProvider.notifier).filterByCategory(widget.categoryId);
+      if (widget.categoryId != null) {
+        final category = await CookbookService.getCategory(widget.categoryId!);
+        ref.read(selectedCategoryProvider.notifier).update((state) => state = category.name);
+      }
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    final recipes = ref.watch(recipesProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
 
     double width = MediaQuery.of(context).size.width;
     bool mobileModal = true;
@@ -49,10 +65,10 @@ class RecipesPage extends ConsumerWidget {
             children: [
               Padding(
                 padding: EdgeInsets.only(top: topPadding),
-                child: state.when(
+                child: recipes.when(
                   data: (state) => RecipesGrid(
                     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-                    recipes: state.recipes,
+                    recipes: state,
                   ),
                   loading: () => const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(child: Text('Error: $error')),
@@ -66,20 +82,14 @@ class RecipesPage extends ConsumerWidget {
                       openCategories(
                         context: context, 
                         isMobile: mobileModal, 
-                        push: false, 
-                        onCategoryTap: (category) {
-                          category = category;
-                          ref.read(cookbookProvider.notifier).filterByCategory(category!.id!);
-                          Navigator.pop(context);
-                        }
+                        push: true,
                       );
                     }, 
                     label: const Text('Categories'),
                     icon: const PhosphorIcon(PhosphorIconsRegular.squaresFour),
                   ),
                 ),
-          
-              if (categoryId != null)
+              if (selectedCategory != null)
                 Positioned(
                   top: 50,
                   child: Padding(
@@ -100,29 +110,18 @@ class RecipesPage extends ConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          FutureBuilder(
-                            future: CookbookService.getCategory(categoryId!),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return const CircularProgressIndicator();
-                              }
-
-                              final filterCategory = snapshot.data as Category;
-                              return Text(
-                                filterCategory.name ?? "",
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                  fontWeight: FontWeight.w500
-                                )
-                              );
-                            }
+                          Text(
+                            selectedCategory,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.w500
+                            )
                           ),
                           const SizedBox(width: 5),
                           IconButton(
                             onPressed: () {
-                              //GoRouter.of(context).go('/recipes');
-                              ref.read(cookbookProvider.notifier).filterByCategory(null);
-
+                              ref.read(selectedCategoryProvider.notifier).update((state) => state = null);
+                              GoRouter.of(context).replace('/recipes');
                             }, 
                             icon: const PhosphorIcon(PhosphorIconsRegular.x, size: 20),
                           )

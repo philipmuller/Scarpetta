@@ -5,6 +5,8 @@ import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:scarpetta/components/add_recipe_button.dart';
+import 'package:scarpetta/components/auth_button.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/pages/categories_page.dart';
@@ -180,25 +182,8 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     );
   }
 
-  FloatingActionButton _addRecipeButton(bool extended) {
-    double width = MediaQuery.of(context).size.width;
-    bool isMobile = width < Breakpoint.md;
-    if (extended) {
-      return FloatingActionButton.extended(
-        onPressed: () {
-          openAddEditRecipe(context: context, isMobile: isMobile);
-        }, 
-        label: const Text('Add Recipe'),
-        icon: const PhosphorIcon(PhosphorIconsRegular.plus),
-      );
-    }
-
-    return FloatingActionButton(
-      onPressed: () {
-        openAddEditRecipe(context: context, isMobile: isMobile);
-      }, 
-      child: const PhosphorIcon(PhosphorIconsRegular.plus),
-    );
+  Widget _addRecipeButton(bool extended) {
+    return AddRecipeButton(extended: extended);
   }
 
   AppBar _appBar(bool isDesktop) {
@@ -242,19 +227,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
           alignment: Alignment.center,
           children: [
             _iconBackground(),
-            IconButton(
-              icon: FirebaseAuth.instance.currentUser == null 
-              ? const PhosphorIcon(PhosphorIconsRegular.signIn) 
-              : const PhosphorIcon(PhosphorIconsRegular.signOut),
-              onPressed: () {
-                if (FirebaseAuth.instance.currentUser == null) {
-                  FirebaseAuth.instance.signInAnonymously();
-                } else {
-                  FirebaseAuth.instance.signOut();
-                }
-                
-              },
-            ),
+            AuthButton(),
           ],
         ),
         SizedBox(width: 5.0),

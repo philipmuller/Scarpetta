@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/model/category.dart';
-import 'package:scarpetta/providers&state/cookbook_provider.dart';
+import 'package:scarpetta/providers&state/categories_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 
@@ -16,7 +16,7 @@ class CategoriesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(cookbookProvider);
+    final state = ref.watch(categoriesProvider);
 
     double width = MediaQuery.of(context).size.width;
     double topPadding = 30.0;
@@ -53,7 +53,7 @@ class CategoriesPage extends ConsumerWidget {
         crossAxisSpacing: 5.0,
         mainAxisSpacing: 5.0,
         children: state.when(
-          data: (state) => state.categories.map((category) {
+          data: (state) => state.map((category) {
             return CategoryIndicator(
               category: category,
               onTap: onCategoryTap,

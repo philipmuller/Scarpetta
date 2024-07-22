@@ -84,7 +84,7 @@ final _navigatorBranches = [
         name: "recipes",
         path: '/recipes',
         builder: (context, state) {
-          return const RecipesPage();
+          return RecipesPage();
         },
         routes: [
           GoRoute(
@@ -93,7 +93,7 @@ final _navigatorBranches = [
             path: 'categories/:id',
             builder: (context, state) {
               final categoryId = state.pathParameters['id'] ?? "";
-              if (categoryId == "") return const RecipesPage();
+              if (categoryId == "") return RecipesPage();
               print("About to show category page with id: $categoryId");
               return RecipesPage(categoryId: categoryId, key: UniqueKey(),);
             }
