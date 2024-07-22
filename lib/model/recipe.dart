@@ -9,6 +9,7 @@ class Recipe {
   final String name;
   final String description;
   final String? imageUrl;
+  final int favouriteCount;
   final List<RecipeIngredient> ingredients;
   final List<RecipeStep> steps;
   final List<Category> categories;
@@ -19,6 +20,7 @@ class Recipe {
     required this.name,
     required this.description,
     this.imageUrl,
+    this.favouriteCount = 0,
     this.ingredients = const [],
     this.steps = const [],
     this.categories = const [],
@@ -51,6 +53,7 @@ class Recipe {
       name: map['name'],
       description: map['description'],
       imageUrl: map['imageUrl'],
+      favouriteCount: map['favouriteCount'],
       ingredients: ingredientsList,
       steps: stepsList,
       categories: categoriesList,
@@ -61,6 +64,7 @@ class Recipe {
     Map<String, dynamic> map = {
       'name': name,
       'description': description,
+      'favouriteCount': favouriteCount,
       'ingredients': ingredients.map((ingredient) => ingredient.toMap()).toList(),
       'steps': steps.map((step) => step.toMap()).toList(),
       'categories': categories.map((category) => category.name).toList(),
@@ -87,6 +91,7 @@ class Recipe {
     String? name,
     String? description,
     String? imageUrl,
+    int? favouriteCount,
     List<RecipeIngredient>? ingredients,
     List<RecipeStep>? steps,
     List<Category>? categories,
@@ -97,6 +102,7 @@ class Recipe {
       name: name ?? this.name,
       description: description ?? this.description,
       imageUrl: imageUrl ?? this.imageUrl,
+      favouriteCount: favouriteCount ?? this.favouriteCount,
       ingredients: ingredients ?? this.ingredients,
       steps: steps ?? this.steps,
       categories: categories ?? this.categories,
