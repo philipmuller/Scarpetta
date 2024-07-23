@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:scarpetta/components/featured_card.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/categories_page.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/providers&state/user_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
@@ -20,6 +22,8 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context){//, WidgetRef ref) {
+    final sessionState = Provider.of<SessionProvider>(context);
+
     double width = MediaQuery.of(context).size.width;
     bool mobileModal = true;
     bool isDesktop = false;
@@ -56,8 +60,7 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 60),
             ElevatedButton(
               onPressed: () async {
-                await FirebaseAuth.instance.signInAnonymously();
-                //ref.watch(userProvider.notifier).fetchUser();
+                sessionState.login();
               }, 
               child: Text("Log in")
             ),

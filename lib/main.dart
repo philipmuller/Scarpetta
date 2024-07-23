@@ -5,6 +5,7 @@ import 'package:scarpetta/components/adaptive_navigator.dart';
 import 'package:scarpetta/providers&state/categories_provider.dart';
 import 'package:scarpetta/providers&state/navigation_state_provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/themes/main_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -24,7 +25,8 @@ void main() async {
     providers: [
       ChangeNotifierProvider(create: (_) => recipeProvider),
       ChangeNotifierProvider(create: (_) => categoryProvider),
-      ChangeNotifierProvider(create: (_) => navigationStateProvider)
+      ChangeNotifierProvider(create: (_) => navigationStateProvider),
+      ChangeNotifierProvider(create: (_) => SessionProvider())
     ],
     child: Scarpetta()
   ));

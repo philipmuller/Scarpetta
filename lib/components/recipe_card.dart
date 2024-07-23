@@ -6,10 +6,14 @@ import 'package:scarpetta/pages/recipe_page.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 
 class RecipeCard extends StatelessWidget {
-  final Recipe recipe;
+  final Recipe? recipe;
+  final String? name;
+  final String? description;
+  final String? imageUrl;
   final Function()? onTap;
 
-  const RecipeCard({super.key, required this.recipe, this.onTap});
+  const RecipeCard.withRecipe({super.key, required this.recipe, this.onTap}) : name = null, description = null, imageUrl = null;
+  const RecipeCard.withDetails({super.key, required String name, required String description, required Function()? onTap, required this.imageUrl}) : recipe = null, name = name, description = description, onTap = onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,9 @@ class RecipeCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         onTap?.call();
-        Navigator.push(context, MaterialPageRoute(builder: (context) => RecipePage(recipe: recipe)));
+        if (recipe != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => RecipePage(recipe: recipe!)));
+        }
       },
       child: Container(
         decoration: BoxDecoration(
@@ -55,9 +61,9 @@ class RecipeCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(recipe.name, style: titleStyle),
+                  Text(name ?? recipe!.name, style: titleStyle),
                   const SizedBox(height: 10.0),
-                  Text(recipe.description, style: descriptionStyle, maxLines: 3,),
+                  Text(description ?? recipe!.description, style: descriptionStyle, maxLines: 3,),
                 ],
               ),
             ),
@@ -71,7 +77,7 @@ class RecipeCard extends StatelessWidget {
     return Expanded(
       child: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        child: SCImage(imageUrl: recipe.imageUrl, height: double.infinity,),
+        child: SCImage(imageUrl: imageUrl ?? recipe?.imageUrl, height: double.infinity,),
       ),
     );
   }

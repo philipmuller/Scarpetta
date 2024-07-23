@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:scarpetta/components/add_recipe_button.dart';
 import 'package:scarpetta/components/featured_card.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/components/sc_app_bar.dart';
@@ -9,6 +10,7 @@ import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/categories_page.dart';
 import 'package:scarpetta/providers&state/categories_provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
@@ -40,13 +42,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context){
+    final session = Provider.of<SessionProvider>(context);
 
     double width = MediaQuery.of(context).size.width;
-    bool mobileModal = true;
+    bool isMobile = true;
     bool isDesktop = false;
 
     if (width > Breakpoint.md) {
-      mobileModal = false;
+      isMobile = false;
     }
     if (width > Breakpoint.lg) {
       isDesktop = true;
@@ -57,6 +60,10 @@ class _HomePageState extends State<HomePage> {
       appBar: SCAppBar(title: "Home", transparent: true,),
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: session.isLoggedIn && isMobile
+        ? const AddRecipeButton()
+        : null,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(top: topPadding, left: xPadding, right: xPadding),
@@ -86,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                         }
                         openCategories(
                           context: context, 
-                          isMobile: mobileModal, 
+                          isMobile: isMobile, 
                         );
                       },
                       child: const Text("See all"),

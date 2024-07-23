@@ -13,10 +13,12 @@ import 'package:scarpetta/components/recipes_grid.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/pages/categories_page.dart';
 import 'package:scarpetta/pages/home_page.dart';
+import 'package:scarpetta/pages/login_page.dart';
 import 'package:scarpetta/pages/my_favourites_page.dart';
 import 'package:scarpetta/pages/profile_page.dart';
 import 'package:scarpetta/pages/recipes_page.dart';
 import 'package:scarpetta/providers&state/navigation_state_provider.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/navigator_target.dart';
@@ -52,7 +54,6 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
   bool _isShowingRecipe = false;
   bool _isRootNode = true;
   final _pageTitles = ["Home", "Recipes", "Profile"];
-  bool _isLoggedIn = FirebaseAuth.instance.currentUser != null;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +61,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     double height = MediaQuery.of(context).size.height;
 
     final navState = Provider.of<NavigationState>(context);
+    final sessionState = Provider.of<SessionProvider>(context);
 
     final List<Widget> pages = [
       Navigator(
@@ -73,14 +75,14 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         key: navState.navigatorKeys[1],
         onGenerateRoute: (route) => MaterialPageRoute(
           settings: route,
-          builder: (context) => RecipesPage()
+          builder: (context) => const RecipesPage()
         )
       ),
       Navigator(
         key: navState.navigatorKeys[2],
         onGenerateRoute: (route) => MaterialPageRoute(
           settings: route,
-          builder: (context) => ProfilePage()
+          builder: (context) => sessionState.isLoggedIn ? ProfilePage() : const LoginPage()
         )
       ),
     ];
@@ -119,6 +121,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
 
   Widget _tabletLayout(double height, {required NavigationState navState, required List<Widget> pages}) {
     bool extendedRail = false;
+    final session = Provider.of<SessionProvider>(context);
     
     return Row(
       children: [
@@ -132,7 +135,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
             child: Column(
               children: [
                 const Spacer(flex: 2),
-                if (_isLoggedIn)
+                if (session.isLoggedIn)
                   _addRecipeButton(false),
                 const SizedBox(height: 20.0)
               ],
@@ -161,6 +164,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
   }
 
   Widget _desktopLayout({required NavigationState navState, required List<Widget> pages}) {
+    final session = Provider.of<SessionProvider>(context);
 
     return Row(
       children: [
@@ -182,7 +186,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
                 label: Text(route.label),
               );
             }).toList(),
-            if (_isLoggedIn)
+            if (session.isLoggedIn)
               Padding(
                 padding: EdgeInsets.only(left: 20.0, right: 20.0, top: MediaQuery.of(context).size.height - 430,),
                 child: _addRecipeButton(true),

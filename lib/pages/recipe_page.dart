@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:scarpetta/components/sc_app_bar.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
+import 'package:scarpetta/providers&state/navigation_state_provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/providers&state/user_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
@@ -33,6 +36,10 @@ class _RecipePageState extends State<RecipePage> {
 
   @override
   Widget build(BuildContext context) {
+    final recipeProvider = Provider.of<RecipeProvider>(context);
+    final sessionProvider = Provider.of<SessionProvider>(context);
+    final navigationProvider = Provider.of<NavigationState>(context);
+
     print("PAGE RELOADED");
     double width = MediaQuery.of(context).size.width;
     bool isMobile = true;
@@ -40,20 +47,71 @@ class _RecipePageState extends State<RecipePage> {
       isMobile = false;
     }
 
-    //final recipes = ref.watch(recipesProvider);
-    //final recipe = recipes.value?.firstWhere((element) => element.id == widget.recipe.id);
-    //final user = ref.watch(userProvider);
-    final isUserFavourite = true;//user.value?['favourites'].contains(widget.recipe.id);
+    final isUserFavourite = true;
 
     return Scaffold(
       appBar: SCAppBar(transparent: true,),
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
-      body: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          SingleChildScrollView(
-            child: Column(
+      floatingActionButton: 
+      (widget.recipe.authorId == sessionProvider.user?.uid)
+      ? Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              onPressed: () {
+                openAddEditRecipe(
+                  context: context, 
+                  isMobile: isMobile, 
+                  recipeToEdit: recipeProvider.recipesMap[widget.recipe.id] ?? widget.recipe, 
+                  onSubmit: (submittedRecipe) {
+                    recipeProvider.updateRecipe(submittedRecipe);
+                  }
+                );
+              }, 
+              //label: const Text('Edit Recipe'),
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              child: PhosphorIcon(PhosphorIconsRegular.pen, color: Theme.of(context).colorScheme.onSecondaryContainer,),
+            ),
+            const SizedBox(width: 20.0),
+            FloatingActionButton(
+              onPressed: () {
+                showDialog(context: context, useRootNavigator: true, builder: (presentationContext) {
+                  return AlertDialog(
+                    title: const Text("Delete Recipe"),
+                    content: const Text("Are you sure you want to delete this recipe?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(presentationContext).pop();
+                        }, 
+                        child: const Text("Cancel"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(presentationContext);
+                          recipeProvider.deleteRecipe(widget.recipe.id);
+                          Navigator.pop(context);
+                        }, 
+                        style: TextButton.styleFrom(
+                          foregroundColor: Theme.of(context).colorScheme.error,
+                        ),
+                        child: const Text("Delete"),
+                      ),
+                    ],
+                  );
+                });
+              }, 
+              backgroundColor: Theme.of(context).colorScheme.error,
+              child: PhosphorIcon(PhosphorIconsRegular.trash, color: Theme.of(context).colorScheme.onError,),
+            ),
+          ],
+        )
+      : null,
+      body: SingleChildScrollView(
+        child: Consumer<RecipeProvider>(
+          builder: (context, recipeProvider, child) {
+            return Column(
               children: [
                 Padding(
                   padding: EdgeInsets.all(isMobile ? 0 : 10.0),
@@ -71,7 +129,7 @@ class _RecipePageState extends State<RecipePage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Flexible(child: Text(widget.recipe.name, style: Theme.of(context).textTheme.displayMedium)),
+                          Flexible(child: Text(recipeProvider.recipesMap[widget.recipe.id]?.name ?? widget.recipe.name, style: Theme.of(context).textTheme.displayMedium)),
                           if (FirebaseAuth.instance.currentUser?.uid != null)
                             Padding(
                               padding: const EdgeInsets.only(left: 10.0, top: 7.0),
@@ -95,13 +153,13 @@ class _RecipePageState extends State<RecipePage> {
                         ],
                       ),
                       const SizedBox(height: 20.0),
-                      Text(widget.recipe.description),
+                      Text(recipeProvider.recipesMap[widget.recipe.id]?.description ?? widget.recipe.description, style: Theme.of(context).textTheme.bodyLarge),
                       const SizedBox(height: 30.0),
                       Text("Ingredients", style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 10.0),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: widget.recipe.ingredients
+                        children: (recipeProvider.recipesMap[widget.recipe.id]?.ingredients ?? widget.recipe.ingredients)
                           .map((ingredient) => Padding(
                             padding: const EdgeInsets.only(left: 8.0, bottom: 4.0),
                             child: Text("${ingredient.quantity}${ingredient.unit.abbreviation} ${ingredient.name()}"),
@@ -112,7 +170,7 @@ class _RecipePageState extends State<RecipePage> {
                       Text("Steps", style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 10.0),
                       Column(
-                        children: widget.recipe.steps
+                        children: (recipeProvider.recipesMap[widget.recipe.id]?.steps ?? widget.recipe.steps)
                           .asMap()
                           .entries
                           .map((entry) => Padding(
@@ -144,69 +202,9 @@ class _RecipePageState extends State<RecipePage> {
                   ],),
                 ),
               ],
-            )
-          ),
-          if (widget.recipe.authorId == FirebaseAuth.instance.currentUser?.uid)
-            Padding(
-              padding: const EdgeInsets.all(35.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  FloatingActionButton.small(
-                    onPressed: () {
-                      openAddEditRecipe(
-                        context: context, 
-                        isMobile: isMobile, 
-                        recipeToEdit: widget.recipe, 
-                        onSubmit: (submittedRecipe) {
-                          //final provider = ref.read(recipesProvider.notifier);
-                          //provider.updateRecipe(updatedRecipe: submittedRecipe, id: widget.recipe.id);
-                        }
-                      );
-                    }, 
-                    //label: const Text('Edit Recipe'),
-                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                    child: PhosphorIcon(PhosphorIconsRegular.pen, color: Theme.of(context).colorScheme.onSecondaryContainer,),
-                  ),
-                  const SizedBox(width: 20.0),
-                  const SizedBox(width: 20.0),
-                  FloatingActionButton.small(
-                    onPressed: () {
-                      if (widget.recipe.id != null) {
-                        showDialog(context: context, builder: (context) {
-                          return AlertDialog(
-                            title: const Text("Delete Recipe"),
-                            content: const Text("Are you sure you want to delete this recipe?"),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                }, 
-                                child: const Text("Cancel"),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  //ref.read(recipesProvider.notifier).deleteRecipe(id: widget.recipe.id!);
-                                }, 
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Theme.of(context).colorScheme.error,
-                                ),
-                                child: const Text("Delete"),
-                              ),
-                            ],
-                          );
-                        });
-                      }
-                    }, 
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                    child: PhosphorIcon(PhosphorIconsRegular.trash, color: Theme.of(context).colorScheme.onError,),
-                  ),
-                ],
-              ),
-            ),
-        ],
+            );
+          }
+        )
       ),
     );
   }

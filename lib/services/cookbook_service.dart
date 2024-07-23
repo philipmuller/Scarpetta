@@ -64,16 +64,17 @@ class CookbookService {
     return user.data()!;
   }
 
-  static addRecipe(Recipe recipe) async {
+  static Future<Recipe> addRecipe(Recipe recipe) async {
     print("CookbookService.addRecipe($recipe)");
     final newRecipe = await FirebaseFirestore.instance.collection('recipes').add(recipe.toMap(includeId: false));
-    if (recipe.authorId == null) return;
+    return Recipe.fromMap(map: (await newRecipe.get()).data()!, id: newRecipe.id);
+    //if (recipe.authorId == null) return;
 
-    final user = await _getUserInformation(recipe.authorId!);
-    print(user.data());
-    user.reference.update({
-      'creations': FieldValue.arrayUnion([newRecipe.id])
-    });
+    // final user = await _getUserInformation(recipe.authorId!);
+    // print(user.data());
+    // user.reference.update({
+    //   'creations': FieldValue.arrayUnion([newRecipe.id])
+    // });
   }
 
   static updateRecipe({required Recipe recipe, String? id}) async {
@@ -110,12 +111,12 @@ class CookbookService {
     query = query.orderBy('name');
     print("Ordering by name...");
 
-    // query = query.limit(pageSize);
-    // if (pageKey != null) {
-    //   final documentSnapshot = await _firestore.collection('recipes').doc(pageKey).get();
-    //   query = query.startAfterDocument(documentSnapshot);
+    query = query.limit(pageSize);
+    if (pageKey != null) {
+      final documentSnapshot = await _firestore.collection('recipes').doc(pageKey).get();
+      query = query.startAfterDocument(documentSnapshot);
       
-    // }
+    }
     
 
     print("About to execute query...");

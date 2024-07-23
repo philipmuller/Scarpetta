@@ -8,7 +8,7 @@ void openAddEditRecipe({required BuildContext context, bool isMobile = false, Re
   if (isMobile) {
     showModalBottomSheet(
       isScrollControlled: true,
-      useRootNavigator: false,
+      useRootNavigator: true,
       useSafeArea: true,
       enableDrag: true,
       showDragHandle: true,

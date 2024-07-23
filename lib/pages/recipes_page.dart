@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:scarpetta/components/add_recipe_button.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
 import 'package:scarpetta/components/sc_app_bar.dart';
@@ -9,6 +11,7 @@ import 'package:scarpetta/pages/categories_page.dart';
 import 'package:scarpetta/providers&state/categories_provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/providers&state/selected_category_provider.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/components/recipe_card.dart';
 import 'package:scarpetta/util/breakpoint.dart';
@@ -46,6 +49,7 @@ class _RecipesPageState extends State<RecipesPage> {
   Widget build(BuildContext context) {
     //final recipes = ref.watch(recipesProvider);
     //final selectedCategory = ref.watch(selectedCategoryProvider);
+    final sessionProvider = Provider.of<SessionProvider>(context);
 
     double width = MediaQuery.of(context).size.width;
     bool mobileModal = true;
@@ -64,18 +68,26 @@ class _RecipesPageState extends State<RecipesPage> {
             appBar: SCAppBar(title: widget.category?.name ?? "Recipes"),
             floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
             floatingActionButton: (!isDesktop)
-              ? Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: FloatingActionButton.extended(
-                  onPressed: () {
-                    openCategories(
-                      context: context, 
-                      isMobile: mobileModal, 
-                      push: true,
-                    );
-                  }, 
-                  label: const Text('Categories'),
-                  icon: const PhosphorIcon(PhosphorIconsRegular.squaresFour),
+              ? Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    if (sessionProvider.isLoggedIn)
+                      const SizedBox(width: 56),
+                    FloatingActionButton.extended(
+                      onPressed: () {
+                        openCategories(
+                          context: context, 
+                          isMobile: mobileModal, 
+                          push: true,
+                        );
+                      }, 
+                      label: const Text('Categories'),
+                      icon: const PhosphorIcon(PhosphorIconsRegular.squaresFour),
+                    ),
+                    if (sessionProvider.isLoggedIn)
+                      const AddRecipeButton()
+                  ],
                 ),
               )
               : null,

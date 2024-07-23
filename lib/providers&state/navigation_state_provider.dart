@@ -14,10 +14,14 @@ class NavigationState extends ChangeNotifier {
     _selectedIndex = index;
     notifyListeners();
   }
-  
+
   void navigateToRoute(int tabIndex, Route<dynamic> route) {
     setIndex(tabIndex);
     navigatorKeys[tabIndex].currentState?.push(route);
+  }
+
+  void popNavigator(int tabIndex) {
+    navigatorKeys[tabIndex].currentState?.pop();
   }
 }
 

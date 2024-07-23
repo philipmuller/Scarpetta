@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:scarpetta/components/recipe_card.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
+import 'package:scarpetta/pages/recipe_page.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 
@@ -23,15 +24,25 @@ class _RecipesGridState extends State<RecipesGrid> {
   final int _pageSize = 10;
 
   final PagingController<String?, Recipe> _pagingController = PagingController(firstPageKey: null);
+  late ScrollController _scrollController;
 
   @override
   void initState() {
+    super.initState();
+    _scrollController = ScrollController();
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
-    super.initState();
-  }
 
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
+        final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
+        recipeProvider.newRecipeStream.listen((_) {
+          _refreshList();
+        });
+      }
+    );
+  }
 
   Future<void> _fetchPage(String? pageKey) async {
     try {
@@ -46,6 +57,17 @@ class _RecipesGridState extends State<RecipesGrid> {
       }
     } catch (error) {
       _pagingController.error = error;
+    }
+  }
+
+  void _refreshList() {
+    _pagingController.refresh();
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
@@ -77,7 +99,7 @@ class _RecipesGridState extends State<RecipesGrid> {
         padding: widget.padding,
         itemCount: widget.recipes!.length,
         itemBuilder: (context, index) {
-          return RecipeCard(recipe: widget.recipes![index], onTap: widget.onRecipeTap);
+          return RecipeCard.withRecipe(recipe: widget.recipes![index], onTap: widget.onRecipeTap);
         },
       );
     }
@@ -88,6 +110,7 @@ class _RecipesGridState extends State<RecipesGrid> {
           onRefresh: () => Future.sync(() => _pagingController.refresh()),
           child: PagedGridView(
             pagingController: _pagingController,
+            scrollController: _scrollController,
             clipBehavior: Clip.none,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: numberOfColumns,
@@ -98,7 +121,15 @@ class _RecipesGridState extends State<RecipesGrid> {
             padding: widget.padding,
             builderDelegate: PagedChildBuilderDelegate<Recipe>(
               itemBuilder: (context, recipe, index) {
-                return RecipeCard(recipe: recipeProvider.recipesMap['id'] ?? recipe, onTap: widget.onRecipeTap);
+                return RecipeCard.withDetails(
+                  name: recipeProvider.recipesMap[recipe.id]?.name ?? recipe.name,
+                  description: recipeProvider.recipesMap[recipe.id]?.description ?? recipe.description,
+                  imageUrl: recipeProvider.recipesMap[recipe.id]?.imageUrl ?? recipe.imageUrl,
+                  onTap: () {
+                    widget.onRecipeTap?.call();
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => RecipePage(recipe: recipeProvider.recipesMap[recipe.id] ?? recipe)));
+                  },
+                );
               },
             )
           ),
