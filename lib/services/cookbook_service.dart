@@ -81,33 +81,83 @@ class CookbookService {
     await FirebaseFirestore.instance.collection('recipes').doc(id ?? recipe.id).update(recipe.toMap(includeId: false));
   }
 
-  static Future<List<Recipe>> getRecipes({String? categoryId, String? authorId, List<String>? favouritedByUser}) async {
-    print("CookbookService.getRecipes($categoryId)");
-    //print("Retreiving recipes...");
-    Query<Map<String, dynamic>> query;
-    final category = await _firestore.collection('categories').doc(categoryId).get();
+  static Future<List<Recipe>> getRecipes({
+    Category? category,
+    String? authorId,
+    List<String>? favouritedByUser,
+    String? pageKey,
+    int pageSize = 10
+  }) async {
+    print("CookbookService.getRecipes(categoryId: ${category?.name}, authorId: $authorId, favouritedByUser: $favouritedByUser, pageKey: $pageKey, pageSize: $pageSize)");
 
-    query = _firestore.collection('recipes').where('name', isGreaterThanOrEqualTo: '');
-    if (categoryId != null) query = query.where('categories', arrayContains: category.data()!['name']);
-    if (authorId != null) query = query.where('authorId', isEqualTo: authorId);
-    if (favouritedByUser != null) query = query.where(FieldPath.documentId, whereIn: favouritedByUser);
-    final snapshot = await query.get();
+    Query<Map<String, dynamic>> query = _firestore.collection('recipes');
+    print("Got through first query building...");
 
-    final recipes = snapshot.docs.map((doc) {
-      //print(doc.data());
-      final recipe = Recipe.fromMap(map: doc.data(), id: doc.id);
-      return recipe;
-    }).toList();
+    // Apply filters
+    if (category != null) {
+      query = query.where('categories', arrayContains: category.name);
+      print("Applied category filter...");
+    }
+    if (authorId != null) {
+      query = query.where('authorId', isEqualTo: authorId);
+      print("Applied author filter...");
+    }
+    if (favouritedByUser != null && favouritedByUser.isNotEmpty) {
+      query = query.where(FieldPath.documentId, whereIn: favouritedByUser);
+      print("Applied favouritedByUser filter...");
+    }
 
-    //print("Recipes retreived: $recipes");
+    query = query.orderBy('name');
+    print("Ordering by name...");
 
-    return recipes;
+    // query = query.limit(pageSize);
+    // if (pageKey != null) {
+    //   final documentSnapshot = await _firestore.collection('recipes').doc(pageKey).get();
+    //   query = query.startAfterDocument(documentSnapshot);
+      
+    // }
+    
+
+    print("About to execute query...");
+    try {
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await query.get();
+      print("Executed query...");
+      print(snapshot.docs.length);
+
+      // Convert documents to Recipe objects
+
+      print("Converting documents to Recipe objects...");
+      final List<Recipe> recipes = snapshot.docs.map((doc) {
+        final recipe = Recipe.fromMap(map: doc.data(), id: doc.id);
+        print(recipe.name);
+        return recipe;
+      }).toList();
+
+      print("Recipes retrieved: ${recipes.length}");
+
+      return recipes;
+    } catch (e) {
+      print("Error executing query: $e");
+      return [];
+    }
   }
 
-  static Future<List<Category>> getCategories() async {
-    print("CookbookService.getCategories()");
-    //print("Retreiving categories...");
-    final snapshot = await _firestore.collection('categories').get();
+  static Future<List<Category>> getCategories({String? pageKey, int pageSize = 10}) async {
+    print("CookbookService.getCategories($pageKey, $pageSize)");
+    
+    Query<Map<String, dynamic>> query = _firestore.collection('categories');
+
+    query = query.orderBy('name');
+
+    query = query.limit(pageSize);
+
+    if (pageKey != null) {
+      final documentSnapshot = await _firestore.collection('categories').doc(pageKey).get();
+      query = query.startAfterDocument(documentSnapshot);
+      
+    }
+
+    final snapshot = await query.get();
 
     final categories = snapshot.docs.map((doc) {
       final category = Category.fromMap(map: doc.data(), id: doc.id);

@@ -1,14 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:provider/provider.dart';
 import 'package:scarpetta/components/recipe_card.dart';
+import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
+import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 
-class RecipesGrid extends StatelessWidget {
-  final List<Recipe> recipes;
+class RecipesGrid extends StatefulWidget {
+  final List<Recipe>? recipes;
   final EdgeInsets? padding;
   final Function()? onRecipeTap;
+  final Category? categoryFilter;
 
-  const RecipesGrid({super.key, required this.recipes, this.padding, this.onRecipeTap});
+  RecipesGrid({super.key, this.recipes, this.padding, this.onRecipeTap, this.categoryFilter});
+
+  @override
+  State<RecipesGrid> createState() => _RecipesGridState();
+}
+
+class _RecipesGridState extends State<RecipesGrid> {
+  final int _pageSize = 10;
+
+  final PagingController<String?, Recipe> _pagingController = PagingController(firstPageKey: null);
+
+  @override
+  void initState() {
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
+    super.initState();
+  }
+
+
+  Future<void> _fetchPage(String? pageKey) async {
+    try {
+      final provider = Provider.of<RecipeProvider>(context, listen: false);
+      final newItems = await provider.fetchRecipes(pageKey, _pageSize, widget.categoryFilter);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newItems);
+      } else {
+        final nextPageKey = newItems.last.id;
+        _pagingController.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +66,44 @@ class RecipesGrid extends StatelessWidget {
     //   crossAxisSpacing = 40;
     // }
 
-    return GridView(
-      clipBehavior: Clip.none,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: numberOfColumns,
-        mainAxisSpacing: mainAxisSpacing,
-        crossAxisSpacing: crossAxisSpacing,
-        childAspectRatio: 0.9,
-      ),
-      padding: padding,
-      children: recipes.map((recipe) {
-        return RecipeCard(recipe: recipe, onTap: onRecipeTap);
-      }).toList(),
+    if (widget.recipes != null) {
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: numberOfColumns,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          childAspectRatio: 0.9,
+        ),
+        padding: widget.padding,
+        itemCount: widget.recipes!.length,
+        itemBuilder: (context, index) {
+          return RecipeCard(recipe: widget.recipes![index], onTap: widget.onRecipeTap);
+        },
+      );
+    }
+
+    return Consumer<RecipeProvider>(
+      builder: (context, recipeProvider, child) {
+        return RefreshIndicator(
+          onRefresh: () => Future.sync(() => _pagingController.refresh()),
+          child: PagedGridView(
+            pagingController: _pagingController,
+            clipBehavior: Clip.none,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: numberOfColumns,
+              mainAxisSpacing: mainAxisSpacing,
+              crossAxisSpacing: crossAxisSpacing,
+              childAspectRatio: 0.9,
+            ),
+            padding: widget.padding,
+            builderDelegate: PagedChildBuilderDelegate<Recipe>(
+              itemBuilder: (context, recipe, index) {
+                return RecipeCard(recipe: recipeProvider.recipesMap['id'] ?? recipe, onTap: widget.onRecipeTap);
+              },
+            )
+          ),
+        );
+      } 
     );
   }
 }

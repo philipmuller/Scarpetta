@@ -1,136 +1,107 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:provider/provider.dart';
+import 'package:scarpetta/components/auth_button.dart';
+import 'package:scarpetta/providers&state/navigation_state_provider.dart';
+import 'package:scarpetta/util/breakpoint.dart';
+import 'package:scarpetta/util/sc_search_delegate.dart';
 
-class SCAppBar extends StatefulWidget implements PreferredSizeWidget {
-  final String title;
+class SCAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String? title;
+  final bool transparent;
 
-  const SCAppBar({super.key, this.title = "Scarpetta"});
-
-  //mediaquery to get full height of screen
+  const SCAppBar({super.key, this.title, this.transparent = false});
 
   @override
-  State<SCAppBar> createState() => _SCAppBarState();
-
-  @override
-  Size get preferredSize => const Size.fromHeight(80);
-}
-
-class _SCAppBarState extends State<SCAppBar> {
-  bool isSearching = false;
-  //String _query = "";
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    bool isDesktop = false;
+    if (width > Breakpoint.lg) {
+      isDesktop = true;
+    }
+    return _appBar(isDesktop, context);
+  }
+
+  AppBar _appBar(bool isDesktop, BuildContext context) {
+    final navState = Provider.of<NavigationState>(context);
+    
     return AppBar(
-      flexibleSpace: _searchBar(),
+      automaticallyImplyLeading: true,
+      title: (title != null) 
+      ? Padding(
+        padding: EdgeInsets.only(left: isDesktop ? 0 : 20),
+        child: Text(title!),
+      )
+      : null,
+      centerTitle: isDesktop ? true : false,
+      flexibleSpace: !transparent
+      ? ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+          child: Container(
+            width: double.infinity,
+            //height: 40,
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+          ),
+        ),
+      )
+      : null,
+      // leading: !_isRootNode 
+      // ? Stack(
+      //   alignment: Alignment.center,
+      //   children: [
+      //     _iconBackground(),
+      //     IconButton(
+      //       icon: const PhosphorIcon(PhosphorIconsRegular.arrowLeft),
+      //       onPressed: () {
+      //         Navigator.of(context).pop();
+      //       },
+      //     ),
+      //   ],
+      // )
+      // : null,
+      actions: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            _iconBackground(context),
+            AuthButton(),
+          ],
+        ),
+        SizedBox(width: 5.0),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            _iconBackground(context),
+            IconButton(
+              icon: const PhosphorIcon(PhosphorIconsRegular.magnifyingGlass),
+              onPressed: () {
+                showSearch(context: context, delegate: SCSearchDelegate());
+              },
+            ),
+          ],
+        ),
+        SizedBox(width: 20.0),
+      ],
     );
   }
 
-// Flexible(
-//   child: TextField(
-//     decoration: const InputDecoration(
-//       hintText: "What are we cooking?",
-//       border: InputBorder.none,
-//     ),
-//     onChanged: _onQueryChanged,
-//   ),
-// ),
-
-  Widget _searchBar() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 30.0, right: 30.0, top: 10.0),
-      child: Expanded(
-        child: GestureDetector(
-          onTap: () {
-            showSearch(context: context, delegate: RecipeSearch());
-          },
-          child: Container(
-            height: double.infinity,
-            padding: const EdgeInsets.only(left: 35.0, right: 12.0, bottom: 10.0, top: 10.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(100.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  spreadRadius: 2,
-                  blurRadius: 3,
-                  offset: const Offset(0, 0),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("What are you cooking?", style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 2.0),
-                      Text("All Categories · Any Duration · Any Ingredients", style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey.shade400),)
-                    ],
-                  ),
-                ),
-                //const Spacer(),
-                IconButton(
-                  icon: isSearching
-                  ? const PhosphorIcon(PhosphorIconsBold.x)
-                  : const PhosphorIcon(PhosphorIconsBold.magnifyingGlass),
-                  onPressed: () {
-                    setState(() {
-                      isSearching = !isSearching;
-            
-                      if (!isSearching) {
-                        GoRouter.of(context).go('/'); //this is not good, it needs to pop back to previous instead of home
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
+  Widget _iconBackground(BuildContext context) {
+    return ClipOval(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+        child: Container(
+          width: 40,
+          height: 40,
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
         ),
       ),
     );
   }
-}
 
-class RecipeSearch extends SearchDelegate<String> {
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = "";
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, "");
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return Center(
-      child: Text(query),
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return Center(
-      child: Text(query),
-    );
-  }
 }

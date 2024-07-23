@@ -1,31 +1,23 @@
-import 'dart:async';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/material.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 
-class CategoriesProvider extends AsyncNotifier<List<Category>> {
+class CategoryProvider extends ChangeNotifier {
+  final Map<String, Category> _categoryMap = {};
+  Map<String, Category> get categoryMap => _categoryMap;
 
-  List<Category> cachedCategories = [];
+  Future<List<Category>> fetchCategories({String? pageKey, int pageSize = 10}) async {
+    // Simulate API call to fetch recipes
+    final newCategories = await CookbookService.getCategories(pageKey: pageKey, pageSize: pageSize);
 
-  @override
-  Future<List<Category>> build() async {
-    print("CategoriesProvider build()");
-    final categories = await CookbookService.getCategories();
-    cachedCategories = categories;
-    return categories;
+    // Update the local map
+    for (var category in newCategories) {
+      _categoryMap[category.id] = category;
+    }
+    notifyListeners();
+    return newCategories;
   }
-
-  void fetchCategories() async {
-    print("CategoriesProvider fetchCategories()");
-    //final categories = await CookbookService.getCategories();
-    //cachedCategories = categories;
-    state = AsyncValue.data(cachedCategories);
-  }
-  
 }
 
-final categoriesProvider = AsyncNotifierProvider<CategoriesProvider, List<Category>>(() {
-  return CategoriesProvider();
-});
+final categoryProvider = CategoryProvider();

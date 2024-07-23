@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/components/adaptive_navigator.dart';
 import 'package:scarpetta/components/category_indicator.dart';
@@ -149,7 +147,7 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
           widget.onSubmit!(newRecipe);
         }
 
-        context.pop();
+        Navigator.pop(context);
       }
 
     } else {
@@ -277,7 +275,7 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
                       isMobile: isMobile, 
                       push: false,
                       onCategoryTap: (category) {
-                        context.pop();
+                        Navigator.pop(context);
                         setState(() {
                           if (_categories.firstWhere((item) => item.id == category.id, orElse: () => Category(name: "Not found")).name == "Not found") {
                             _categories.add(category);

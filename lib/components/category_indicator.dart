@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/category.dart';
+import 'package:scarpetta/model/recipe.dart';
+import 'package:scarpetta/pages/recipe_page.dart';
+import 'package:scarpetta/pages/recipes_page.dart';
+import 'package:scarpetta/providers&state/navigation_state_provider.dart';
 
 class CategoryIndicator extends StatelessWidget {
   final double size;
@@ -20,11 +24,12 @@ class CategoryIndicator extends StatelessWidget {
         onTap?.call(category);
         if (push) {
           print("PUSH IS TRUE");
-          print("About to push to /recipes/categories/${category.id}");
-          if (context.canPop()) {
-            context.pop();
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
           }
-          context.replace("/recipes/categories/${category.id}");
+          //Provider.of<NavigationState>(context, listen: false).setIndex(1);
+          Provider.of<NavigationState>(context, listen: false).navigateToRoute(1, MaterialPageRoute(builder: (context) => RecipesPage(category: category,)));
+          //Navigator.of(context).replace("/recipes/categories/${category.id}");
         }
       },
       child: Column(
