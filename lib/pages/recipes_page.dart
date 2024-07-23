@@ -82,6 +82,7 @@ class _RecipesPageState extends State<RecipesPage> {
             body: Padding(
               padding: EdgeInsets.only(top: topPadding),
               child: RecipesGrid(
+                  categoryFilter: widget.category,
                   padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
                   //recipes: state,
                 ),

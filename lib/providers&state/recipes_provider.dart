@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 
@@ -37,9 +38,9 @@ class RecipeProvider extends ChangeNotifier {
 
   
 
-  Future<List<Recipe>> fetchRecipes(String? pageKey, int pageSize) async {
+  Future<List<Recipe>> fetchRecipes(String? pageKey, int pageSize, Category? categoryFilter) async {
     // Simulate API call to fetch recipes
-    final newRecipes = await CookbookService.getRecipes(pageKey: pageKey, pageSize: pageSize);
+    final newRecipes = await CookbookService.getRecipes(pageKey: pageKey, pageSize: pageSize, category: categoryFilter);
 
     // Update the local map
     for (var recipe in newRecipes) {

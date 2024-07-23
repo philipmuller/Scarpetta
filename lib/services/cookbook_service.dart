@@ -82,50 +82,64 @@ class CookbookService {
   }
 
   static Future<List<Recipe>> getRecipes({
-    String? categoryId,
+    Category? category,
     String? authorId,
     List<String>? favouritedByUser,
     String? pageKey,
     int pageSize = 10
   }) async {
-    print("CookbookService.getRecipes(categoryId: $categoryId, authorId: $authorId, favouritedByUser: $favouritedByUser, pageKey: $pageKey, pageSize: $pageSize)");
+    print("CookbookService.getRecipes(categoryId: ${category?.name}, authorId: $authorId, favouritedByUser: $favouritedByUser, pageKey: $pageKey, pageSize: $pageSize)");
 
     Query<Map<String, dynamic>> query = _firestore.collection('recipes');
+    print("Got through first query building...");
 
     // Apply filters
-    if (categoryId != null) {
-      query = query.where('categories', arrayContains: categoryId);
+    if (category != null) {
+      query = query.where('categories', arrayContains: category.name);
+      print("Applied category filter...");
     }
     if (authorId != null) {
       query = query.where('authorId', isEqualTo: authorId);
+      print("Applied author filter...");
     }
     if (favouritedByUser != null && favouritedByUser.isNotEmpty) {
       query = query.where(FieldPath.documentId, whereIn: favouritedByUser);
+      print("Applied favouritedByUser filter...");
     }
 
-    // Order the query (required for pagination)
     query = query.orderBy('name');
+    print("Ordering by name...");
 
-    // Apply pagination
-    query = query.limit(pageSize);
-    if (pageKey != null) {
-      final documentSnapshot = await _firestore.collection('recipes').doc(pageKey).get();
-      query = query.startAfterDocument(documentSnapshot);
+    // query = query.limit(pageSize);
+    // if (pageKey != null) {
+    //   final documentSnapshot = await _firestore.collection('recipes').doc(pageKey).get();
+    //   query = query.startAfterDocument(documentSnapshot);
       
-    }
+    // }
     
 
-    // Execute the query
-    final QuerySnapshot<Map<String, dynamic>> snapshot = await query.get();
+    print("About to execute query...");
+    try {
+      final QuerySnapshot<Map<String, dynamic>> snapshot = await query.get();
+      print("Executed query...");
+      print(snapshot.docs.length);
 
-    // Convert documents to Recipe objects
-    final List<Recipe> recipes = snapshot.docs.map((doc) {
-      return Recipe.fromMap(map: doc.data(), id: doc.id);
-    }).toList();
+      // Convert documents to Recipe objects
 
-    print("Recipes retrieved: ${recipes.length}");
+      print("Converting documents to Recipe objects...");
+      final List<Recipe> recipes = snapshot.docs.map((doc) {
+        final recipe = Recipe.fromMap(map: doc.data(), id: doc.id);
+        print(recipe.name);
+        return recipe;
+      }).toList();
 
-    return recipes;
+      print("Recipes retrieved: ${recipes.length}");
+
+      return recipes;
+    } catch (e) {
+      print("Error executing query: $e");
+      return [];
+    }
   }
 
   static Future<List<Category>> getCategories({String? pageKey, int pageSize = 10}) async {

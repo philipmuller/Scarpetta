@@ -47,6 +47,8 @@ class _RecipePageState extends State<RecipePage> {
 
     return Scaffold(
       appBar: SCAppBar(transparent: true,),
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
@@ -55,10 +57,10 @@ class _RecipePageState extends State<RecipePage> {
               children: [
                 Padding(
                   padding: EdgeInsets.all(isMobile ? 0 : 10.0),
-                  // child: ClipRRect(
-                  //   borderRadius: BorderRadius.all(isMobile ? Radius.zero : Radius.circular(30.0)),
-                  //   child: SCImage(imageUrl: recipe?.imageUrl, height: isMobile ? 400.0 : 500.0)
-                  // ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(isMobile ? Radius.zero : Radius.circular(30.0)),
+                    child: SCImage(imageUrl: widget.recipe.imageUrl, height: isMobile ? 400.0 : 500.0)
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: topPadding, left: xPadding, right: xPadding, bottom: 30.0),
@@ -69,7 +71,7 @@ class _RecipePageState extends State<RecipePage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          //Flexible(child: Text(recipe?.name ?? '', style: Theme.of(context).textTheme.displayMedium)),
+                          Flexible(child: Text(widget.recipe.name, style: Theme.of(context).textTheme.displayMedium)),
                           if (FirebaseAuth.instance.currentUser?.uid != null)
                             Padding(
                               padding: const EdgeInsets.only(left: 10.0, top: 7.0),
@@ -93,13 +95,13 @@ class _RecipePageState extends State<RecipePage> {
                         ],
                       ),
                       const SizedBox(height: 20.0),
-                      //Text(recipe?.description ?? ''),
+                      Text(widget.recipe.description),
                       const SizedBox(height: 30.0),
                       Text("Ingredients", style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 10.0),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: []//(recipe?.ingredients ?? [])
+                        children: widget.recipe.ingredients
                           .map((ingredient) => Padding(
                             padding: const EdgeInsets.only(left: 8.0, bottom: 4.0),
                             child: Text("${ingredient.quantity}${ingredient.unit.abbreviation} ${ingredient.name()}"),
@@ -110,7 +112,7 @@ class _RecipePageState extends State<RecipePage> {
                       Text("Steps", style: Theme.of(context).textTheme.headlineSmall),
                       const SizedBox(height: 10.0),
                       Column(
-                        children: []//(recipe?.steps ?? [])
+                        children: widget.recipe.steps
                           .asMap()
                           .entries
                           .map((entry) => Padding(
@@ -144,7 +146,7 @@ class _RecipePageState extends State<RecipePage> {
               ],
             )
           ),
-          if (FirebaseAuth.instance.currentUser?.uid == "")//recipe?.authorId)
+          if (widget.recipe.authorId == FirebaseAuth.instance.currentUser?.uid)
             Padding(
               padding: const EdgeInsets.all(35.0),
               child: Row(
@@ -156,7 +158,7 @@ class _RecipePageState extends State<RecipePage> {
                       openAddEditRecipe(
                         context: context, 
                         isMobile: isMobile, 
-                        //recipeToEdit: recipe, 
+                        recipeToEdit: widget.recipe, 
                         onSubmit: (submittedRecipe) {
                           //final provider = ref.read(recipesProvider.notifier);
                           //provider.updateRecipe(updatedRecipe: submittedRecipe, id: widget.recipe.id);

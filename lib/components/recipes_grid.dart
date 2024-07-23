@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:provider/provider.dart';
 import 'package:scarpetta/components/recipe_card.dart';
+import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/util/breakpoint.dart';
@@ -10,8 +11,9 @@ class RecipesGrid extends StatefulWidget {
   final List<Recipe>? recipes;
   final EdgeInsets? padding;
   final Function()? onRecipeTap;
+  final Category? categoryFilter;
 
-  RecipesGrid({super.key, this.recipes, this.padding, this.onRecipeTap});
+  RecipesGrid({super.key, this.recipes, this.padding, this.onRecipeTap, this.categoryFilter});
 
   @override
   State<RecipesGrid> createState() => _RecipesGridState();
@@ -34,7 +36,7 @@ class _RecipesGridState extends State<RecipesGrid> {
   Future<void> _fetchPage(String? pageKey) async {
     try {
       final provider = Provider.of<RecipeProvider>(context, listen: false);
-      final newItems = await provider.fetchRecipes(pageKey, _pageSize);
+      final newItems = await provider.fetchRecipes(pageKey, _pageSize, widget.categoryFilter);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);

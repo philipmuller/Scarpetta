@@ -23,7 +23,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final double topPadding = 10.0;
+  final double topPadding = 60.0;
 
   final double xPadding = 30.0;
 
@@ -55,6 +55,8 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: SCAppBar(title: "Home", transparent: true,),
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(top: topPadding, left: xPadding, right: xPadding),
