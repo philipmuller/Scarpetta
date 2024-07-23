@@ -128,10 +128,22 @@ class CookbookService {
     return recipes;
   }
 
-  static Future<List<Category>> getCategories() async {
-    print("CookbookService.getCategories()");
-    //print("Retreiving categories...");
-    final snapshot = await _firestore.collection('categories').get();
+  static Future<List<Category>> getCategories({String? pageKey, int pageSize = 10}) async {
+    print("CookbookService.getCategories($pageKey, $pageSize)");
+    
+    Query<Map<String, dynamic>> query = _firestore.collection('categories');
+
+    query = query.orderBy('name');
+
+    query = query.limit(pageSize);
+
+    if (pageKey != null) {
+      final documentSnapshot = await _firestore.collection('categories').doc(pageKey).get();
+      query = query.startAfterDocument(documentSnapshot);
+      
+    }
+
+    final snapshot = await query.get();
 
     final categories = snapshot.docs.map((doc) {
       final category = Category.fromMap(map: doc.data(), id: doc.id);
