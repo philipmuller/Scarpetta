@@ -310,6 +310,9 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
                                 if (value == null || value.isEmpty) {
                                   return 'An amount is missing';
                                 }
+                                if (double.tryParse(value) == null) {
+                                  return 'Amount must be a number';
+                                }
                                 return null;
                               },
                             ),
