@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:scarpetta/model/category.dart';
@@ -52,11 +53,28 @@ class RecipeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  
+  void addFavourite(String recipeId) {
+    final recipe = _recipesMap[recipeId];
+    if (recipe != null) {
+      _recipesMap[recipeId] = recipe.copyWith(favouriteCount: recipe.favouriteCount + 1);
+      notifyListeners();
+      //not calling cookbook service as that is handled by the session provider already
+    }
+  }
 
-  Future<List<Recipe>> fetchRecipes(String? pageKey, int pageSize, Category? categoryFilter) async {
+  void removeFavourite(String recipeId) {
+    final recipe = _recipesMap[recipeId];
+    if (recipe != null) {
+      final count = max(0, recipe.favouriteCount - 1);
+      _recipesMap[recipeId] = recipe.copyWith(favouriteCount: count);
+      notifyListeners();
+      //not calling cookbook service as that is handled by the session provider already
+    }
+  }
+
+  Future<List<Recipe>> fetchRecipes(String? pageKey, int pageSize, Category? categoryFilter, String? createdByUserId, List<String>? onlyRecipesMatching) async {
     // Simulate API call to fetch recipes
-    final newRecipes = await CookbookService.getRecipes(pageKey: pageKey, pageSize: pageSize, category: categoryFilter);
+    final newRecipes = await CookbookService.getRecipes(pageKey: pageKey, pageSize: pageSize, category: categoryFilter, authorId: createdByUserId, onlyRecipesMatching: onlyRecipesMatching);
 
     // Update the local map
     for (var recipe in newRecipes) {

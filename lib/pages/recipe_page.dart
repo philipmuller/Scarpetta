@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:scarpetta/components/favourites_button.dart';
 import 'package:scarpetta/components/sc_app_bar.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
@@ -38,7 +39,6 @@ class _RecipePageState extends State<RecipePage> {
   Widget build(BuildContext context) {
     final recipeProvider = Provider.of<RecipeProvider>(context);
     final sessionProvider = Provider.of<SessionProvider>(context);
-    final navigationProvider = Provider.of<NavigationState>(context);
 
     print("PAGE RELOADED");
     double width = MediaQuery.of(context).size.width;
@@ -46,8 +46,6 @@ class _RecipePageState extends State<RecipePage> {
     if (width > Breakpoint.md) {
       isMobile = false;
     }
-
-    final isUserFavourite = true;
 
     return Scaffold(
       appBar: SCAppBar(transparent: true,),
@@ -131,25 +129,7 @@ class _RecipePageState extends State<RecipePage> {
                         children: [
                           Flexible(child: Text(recipeProvider.recipesMap[widget.recipe.id]?.name ?? widget.recipe.name, style: Theme.of(context).textTheme.displayMedium)),
                           if (FirebaseAuth.instance.currentUser?.uid != null)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 10.0, top: 7.0),
-                              child: IconButton(
-                                onPressed: () {
-                                  if (!isUserFavourite) {
-                                    if (widget.recipe.id != null) {
-                                      print("FAVORITE RECIPE: ${widget.recipe.id}");
-                                      //ref.watch(userProvider.notifier).favouriteRecipe(widget.recipe.id!);
-                                    }
-                                  } else {
-                                    if (widget.recipe.id != null) {
-                                      print("UNFAVORITE RECIPE: ${widget.recipe.id}");
-                                      //ref.watch(userProvider.notifier).unFavouriteRecipe(widget.recipe.id!);
-                                    }
-                                  }
-                                },
-                                icon: PhosphorIcon(isUserFavourite ? PhosphorIconsFill.star : PhosphorIconsRegular.star, color: Theme.of(context).colorScheme.onSecondaryContainer,),
-                              ),
-                            ),
+                            FavouritesButton(recipeId: widget.recipe.id, count: recipeProvider.recipesMap[widget.recipe.id]?.favouriteCount ?? widget.recipe.favouriteCount,)
                         ],
                       ),
                       const SizedBox(height: 20.0),

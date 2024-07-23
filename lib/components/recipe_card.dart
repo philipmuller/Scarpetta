@@ -1,8 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:scarpetta/components/favourites_button.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/recipe_page.dart';
+import 'package:scarpetta/providers&state/recipes_provider.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 
 class RecipeCard extends StatelessWidget {
@@ -10,10 +14,12 @@ class RecipeCard extends StatelessWidget {
   final String? name;
   final String? description;
   final String? imageUrl;
+  final int? favouriteCount;
+  final String? recipeId;
   final Function()? onTap;
 
-  const RecipeCard.withRecipe({super.key, required this.recipe, this.onTap}) : name = null, description = null, imageUrl = null;
-  const RecipeCard.withDetails({super.key, required String name, required String description, required Function()? onTap, required this.imageUrl}) : recipe = null, name = name, description = description, onTap = onTap;
+  const RecipeCard.withRecipe({super.key, required this.recipe, this.onTap}) : name = null, description = null, imageUrl = null, favouriteCount = null, recipeId = null;
+  const RecipeCard.withDetails({super.key, required String name, required String description, required int favouriteCount, required String recipeId, required Function()? onTap, required this.imageUrl}) : recipe = null, name = name, description = description, favouriteCount = favouriteCount, recipeId = recipeId, onTap = onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +29,9 @@ class RecipeCard extends StatelessWidget {
 
     TextStyle titleStyle = Theme.of(context).textTheme.displaySmall!;
     TextStyle descriptionStyle = Theme.of(context).textTheme.bodyMedium!;
+
+    final sessionProvider = Provider.of<SessionProvider>(context);
+    final recipesProvider = Provider.of<RecipeProvider>(context, listen: false);
 
     if (width > Breakpoint.md) {
       verticalPadding = 20.0;
@@ -51,22 +60,31 @@ class RecipeCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
+          alignment: Alignment.topRight,
           children: [
-            _recipeImage(context),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name ?? recipe!.name, style: titleStyle),
-                  const SizedBox(height: 10.0),
-                  Text(description ?? recipe!.description, style: descriptionStyle, maxLines: 3,),
-                ],
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _recipeImage(context),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name ?? recipe!.name, style: titleStyle),
+                      const SizedBox(height: 10.0),
+                      Text(description ?? recipe!.description, style: descriptionStyle, maxLines: 3,),
+                    ],
+                  ),
+                ),
+              ],
             ),
+            if (sessionProvider.isLoggedIn)
+              Positioned(
+                child: FavouritesButton(recipeId: recipeId ?? recipe!.id, count: favouriteCount ?? recipe!.favouriteCount, maxWidth: 80),
+              )
           ],
         ),
       ),

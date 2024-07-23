@@ -13,10 +13,10 @@ class MyRecipesPage extends StatelessWidget {
     //final myRecipes = recipes?.where((recipe) => user?['creations'].contains(recipe.id)).toList() ?? [];
 
     return Scaffold(
-      // body: Padding(
-      //   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-      //   child: myRecipes.isEmpty ? const Center(child: Text("You haven't created any recipes yet")) : RecipesGrid(recipes: myRecipes),
-      // ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+        child: RecipesGrid(filterCreatedByUser: true),
+      ),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/recipe_page.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
+import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 
 class RecipesGrid extends StatefulWidget {
@@ -13,8 +14,10 @@ class RecipesGrid extends StatefulWidget {
   final EdgeInsets? padding;
   final Function()? onRecipeTap;
   final Category? categoryFilter;
+  final bool filterFavourites;
+  final bool filterCreatedByUser;
 
-  RecipesGrid({super.key, this.recipes, this.padding, this.onRecipeTap, this.categoryFilter});
+  RecipesGrid({super.key, this.recipes, this.padding, this.onRecipeTap, this.categoryFilter, this.filterFavourites = false, this.filterCreatedByUser = false});
 
   @override
   State<RecipesGrid> createState() => _RecipesGridState();
@@ -37,9 +40,15 @@ class _RecipesGridState extends State<RecipesGrid> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
+        final sessionProvider = Provider.of<SessionProvider>(context, listen: false);
         recipeProvider.newRecipeStream.listen((_) {
           _refreshList();
         });
+        if (widget.filterFavourites) {
+          sessionProvider.favouritesStream.listen((_) {
+            _refreshList();
+          });
+        }
       }
     );
   }
@@ -47,7 +56,18 @@ class _RecipesGridState extends State<RecipesGrid> {
   Future<void> _fetchPage(String? pageKey) async {
     try {
       final provider = Provider.of<RecipeProvider>(context, listen: false);
-      final newItems = await provider.fetchRecipes(pageKey, _pageSize, widget.categoryFilter);
+      List<String>? favouritedByUser;
+      String? userId;
+      if (widget.filterFavourites) {
+        final sessionProvider = Provider.of<SessionProvider>(context, listen: false);
+        favouritedByUser = sessionProvider.userFavourites;
+      }
+      if (widget.filterCreatedByUser) {
+        final sessionProvider = Provider.of<SessionProvider>(context, listen: false);
+        userId = sessionProvider.user?.uid;
+      }
+
+      final newItems = await provider.fetchRecipes(pageKey, _pageSize, widget.categoryFilter, userId, favouritedByUser);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -125,6 +145,8 @@ class _RecipesGridState extends State<RecipesGrid> {
                   name: recipeProvider.recipesMap[recipe.id]?.name ?? recipe.name,
                   description: recipeProvider.recipesMap[recipe.id]?.description ?? recipe.description,
                   imageUrl: recipeProvider.recipesMap[recipe.id]?.imageUrl ?? recipe.imageUrl,
+                  favouriteCount: recipeProvider.recipesMap[recipe.id]?.favouriteCount ?? recipe.favouriteCount,
+                  recipeId: recipe.id,
                   onTap: () {
                     widget.onRecipeTap?.call();
                     Navigator.push(context, MaterialPageRoute(builder: (context) => RecipePage(recipe: recipeProvider.recipesMap[recipe.id] ?? recipe)));

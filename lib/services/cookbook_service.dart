@@ -5,6 +5,7 @@ import 'package:scarpetta/model/ingredient.dart';
 import 'package:scarpetta/model/unit.dart';
 import 'package:scarpetta/model/recipe_step.dart';
 import 'package:scarpetta/model/duration.dart';
+import 'package:scarpetta/model/user_data.dart';
 
 class CookbookService {
 
@@ -29,39 +30,59 @@ class CookbookService {
     return recipes[0];
   }
 
+  static Future<DocumentSnapshot<Map<String, dynamic>>?> _getUserInformation(String userId) async {
+    print("CookbookService._getUserInformation($userId)");
+    final user = await _firestore.collection('users').doc(userId).get();
+    if (!user.exists) return _createNewUser(userId);
+    return user;
+  }
+
+  static Future<DocumentSnapshot<Map<String, dynamic>>?> _createNewUser(String userId) async {
+    print("CookbookService._createNewUser($userId)");
+    final user = await _firestore.collection('users').doc(userId).get();
+    if (user.exists) return user;
+    await _firestore.collection('users').doc(userId).set({
+      'favourites': [],
+      'recipes': [],
+    });
+    return await _firestore.collection('users').doc(userId).get();
+  }
+
   static favouriteRecipe(String userId, String recipeId) async {
     print("CookbookService.favouriteRecipe($userId)");
     final user = await _getUserInformation(userId);
-    user.reference.update({
+    user?.reference.update({
       'favourites': FieldValue.arrayUnion([recipeId])
+    });
+
+    _firestore.collection('recipes').doc(recipeId).update({
+      'favouriteCount': FieldValue.increment(1)
     });
   }
 
   static unFavouriteRecipe(String userId, String recipeId) async {
     print("CookbookService.favouriteRecipe($userId)");
     final user = await _getUserInformation(userId);
-    user.reference.update({
+    user?.reference.update({
       'favourites': FieldValue.arrayRemove([recipeId])
+    });
+
+    _firestore.collection('recipes').doc(recipeId).update({
+      'favouriteCount': FieldValue.increment(-1)
     });
   }
 
-  static Future<DocumentSnapshot<Map<String, dynamic>>> _getUserInformation(String userId) async {
-    print("CookbookService._getUserInformation($userId)");
-    DocumentSnapshot<Map<String, dynamic>> user = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    if (user.exists == false) {
-      await FirebaseFirestore.instance.collection('users').doc(userId).set({
-        'favourites': [],
-        'creations': [],
-      });
-      user = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    }
-    return user;
-  }
-
-  static Future<Map<String, dynamic>> getUserInformation(String userId) async {
+  static Future<UserData?> getUserData(String userId) async {
     print("CookbookService.getUserInformation($userId)");
-    final user = await _getUserInformation(userId);
-    return user.data()!;
+    try {
+      final user = await _getUserInformation(userId);
+      if (user == null) return null;
+      return UserData.fromMap(map: user.data()! , id: user.id);
+    } catch (e) {
+      print("Error getting user data: $e");
+      return null;
+    }
+    
   }
 
   static Future<Recipe> addRecipe(Recipe recipe) async {
@@ -85,11 +106,11 @@ class CookbookService {
   static Future<List<Recipe>> getRecipes({
     Category? category,
     String? authorId,
-    List<String>? favouritedByUser,
+    List<String>? onlyRecipesMatching,
     String? pageKey,
     int pageSize = 10
   }) async {
-    print("CookbookService.getRecipes(categoryId: ${category?.name}, authorId: $authorId, favouritedByUser: $favouritedByUser, pageKey: $pageKey, pageSize: $pageSize)");
+    print("CookbookService.getRecipes(categoryId: ${category?.name}, authorId: $authorId, favouritedByUser: $onlyRecipesMatching, pageKey: $pageKey, pageSize: $pageSize)");
 
     Query<Map<String, dynamic>> query = _firestore.collection('recipes');
     print("Got through first query building...");
@@ -103,8 +124,8 @@ class CookbookService {
       query = query.where('authorId', isEqualTo: authorId);
       print("Applied author filter...");
     }
-    if (favouritedByUser != null && favouritedByUser.isNotEmpty) {
-      query = query.where(FieldPath.documentId, whereIn: favouritedByUser);
+    if (onlyRecipesMatching != null && onlyRecipesMatching.isNotEmpty) {
+      query = query.where(FieldPath.documentId, whereIn: onlyRecipesMatching);
       print("Applied favouritedByUser filter...");
     }
 

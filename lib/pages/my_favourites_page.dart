@@ -7,7 +7,7 @@ class MyFavouritesPage extends StatelessWidget {
   const MyFavouritesPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context){//, WidgetRef ref) {
+  Widget build(BuildContext context) {
     //final recipes = ref.watch(recipesProvider).value;
     //final user = ref.watch(userProvider).value;
     //print("user: $user");
@@ -17,10 +17,10 @@ class MyFavouritesPage extends StatelessWidget {
     // }).toList() ?? [];
 
     return Scaffold(
-      // body: Padding(
-      //   padding: const EdgeInsets.all(20.0),
-      //   child: RecipesGrid(recipes: favourites),
-      // )
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: RecipesGrid(filterFavourites: true),
+      )
     );
   }
 }

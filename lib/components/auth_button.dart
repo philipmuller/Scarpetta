@@ -18,10 +18,14 @@ class AuthButton extends StatelessWidget {
       icon: session.isLoggedIn 
       ? const PhosphorIcon(PhosphorIconsRegular.signOut) 
       : const PhosphorIcon(PhosphorIconsRegular.signIn),
-      onPressed: () {
+      onPressed: () async {
         if (FirebaseAuth.instance.currentUser == null) {
-          session.login();
-          //ref.watch(userProvider.notifier).fetchUser();
+          try {
+            await session.login();
+          } catch (e) {
+            print("Error logging in: $e");
+          }
+          
         } else {
           session.logout();
         }
