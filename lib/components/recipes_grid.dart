@@ -67,7 +67,9 @@ class _RecipesGridState extends State<RecipesGrid> {
         userId = sessionProvider.user?.uid;
       }
 
-      final newItems = await provider.fetchRecipes(pageKey, _pageSize, widget.categoryFilter, userId, favouritedByUser);
+      final newItems = favouritedByUser?.isNotEmpty ?? false 
+      ? await provider.fetchRecipes(pageKey, _pageSize, widget.categoryFilter, userId, favouritedByUser)
+      : <Recipe>[];
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
