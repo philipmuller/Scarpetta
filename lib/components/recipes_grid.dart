@@ -67,7 +67,7 @@ class _RecipesGridState extends State<RecipesGrid> {
         userId = sessionProvider.user?.uid;
       }
 
-      final newItems = favouritedByUser?.isNotEmpty ?? false 
+      final newItems = (favouritedByUser?.isNotEmpty ?? false) || favouritedByUser == null
       ? await provider.fetchRecipes(pageKey, _pageSize, widget.categoryFilter, userId, favouritedByUser)
       : <Recipe>[];
       final isLastPage = newItems.length < _pageSize;
