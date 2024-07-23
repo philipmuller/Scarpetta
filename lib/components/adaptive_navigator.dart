@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:scarpetta/components/add_recipe_button.dart';
 import 'package:scarpetta/components/auth_button.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
@@ -13,8 +14,9 @@ import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/pages/categories_page.dart';
 import 'package:scarpetta/pages/home_page.dart';
 import 'package:scarpetta/pages/my_favourites_page.dart';
+import 'package:scarpetta/pages/profile_page.dart';
 import 'package:scarpetta/pages/recipes_page.dart';
-import 'package:scarpetta/pages/search_page.dart';
+import 'package:scarpetta/providers&state/navigation_state_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/navigator_target.dart';
@@ -31,12 +33,6 @@ class AdaptiveNavigator extends StatefulWidget {
 }
 
 class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
-  int _selectedIndex = 0;
-  List<Widget> _pages = [
-    const HomePage(),
-    const RecipesPage(),
-    const MyFavouritesPage(),
-  ];
 
   final List<NavigatorTarget> _targets = const [
     NavigatorTarget(
@@ -63,29 +59,53 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
 
+    final navState = Provider.of<NavigationState>(context);
+
+    final List<Widget> pages = [
+      Navigator(
+        key: navState.navigatorKeys[0],
+        onGenerateRoute: (route) => MaterialPageRoute(
+          settings: route,
+          builder: (context) => HomePage()
+        )
+      ),
+      Navigator(
+        key: navState.navigatorKeys[1],
+        onGenerateRoute: (route) => MaterialPageRoute(
+          settings: route,
+          builder: (context) => RecipesPage()
+        )
+      ),
+      Navigator(
+        key: navState.navigatorKeys[2],
+        onGenerateRoute: (route) => MaterialPageRoute(
+          settings: route,
+          builder: (context) => ProfilePage()
+        )
+      ),
+    ];
+
     if (width >= Breakpoint.lg) {
-      return _desktopLayout();
+      return _desktopLayout(navState: navState, pages: pages);
     }
 
     if (width >= Breakpoint.md) {
-      return _tabletLayout(height);
+      return _tabletLayout(height, navState: navState, pages: pages);
     }
 
-    return _mobileLayout();
+    return _mobileLayout(navState: navState, pages: pages);
   }
 
-  Widget _mobileLayout() {
+  Widget _mobileLayout({required NavigationState navState, required List<Widget> pages}) {
     return Scaffold(
-        appBar: _appBar(false),
-        floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton(false) : null,
-        extendBodyBehindAppBar: true,
-        body: _pages[_selectedIndex],
+        body: IndexedStack(
+          index: navState.selectedIndex,
+          children: pages,
+        ),
         bottomNavigationBar: NavigationBar(
-          selectedIndex: _selectedIndex,
+          selectedIndex: navState.selectedIndex,
           onDestinationSelected: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
+            navState.setIndex(index);
           },
           destinations: _targets.map((route) {
             return NavigationDestination(
@@ -97,13 +117,13 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
     );
   }
 
-  Widget _tabletLayout(double height) {
+  Widget _tabletLayout(double height, {required NavigationState navState, required List<Widget> pages}) {
     bool extendedRail = false;
     
     return Row(
       children: [
         NavigationRail(
-          selectedIndex: _selectedIndex,
+          selectedIndex: navState.selectedIndex,
           groupAlignment: -1.0,
           extended: extendedRail,
           minWidth: 100,
@@ -119,9 +139,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
             ),
           ),
           onDestinationSelected: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
+            navState.setIndex(index);
           },
           labelType: NavigationRailLabelType.selected, //extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
           destinations: _targets.map((route) {
@@ -133,27 +151,24 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         ),
         //const VerticalDivider(thickness: 1, width: 1),
         Expanded(
-          child: Scaffold(
-            appBar: _appBar(false),
-            //floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton() : null,
-            extendBodyBehindAppBar: true,
-            body: _pages[_selectedIndex],
+          child: IndexedStack(
+            index: navState.selectedIndex,
+            children: pages,
           ),
         )
       ],
     );
   }
 
-  Widget _desktopLayout() {
+  Widget _desktopLayout({required NavigationState navState, required List<Widget> pages}) {
+
     return Row(
       children: [
         NavigationDrawer(
-          selectedIndex: _selectedIndex,
+          selectedIndex: navState.selectedIndex,
           tilePadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
           onDestinationSelected: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
+            navState.setIndex(index);
           },//extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
           children: [
             Padding(
@@ -177,11 +192,9 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         ),
         //const VerticalDivider(thickness: 1, width: 1),
         Expanded(
-          child: Scaffold(
-            appBar: _appBar(true),
-            //floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton() : null,
-            extendBodyBehindAppBar: true,
-            body: _pages[_selectedIndex],
+          child: IndexedStack(
+            index: navState.selectedIndex,
+            children: pages,
           ),
         )
       ],
@@ -190,80 +203,5 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
 
   Widget _addRecipeButton(bool extended) {
     return AddRecipeButton(extended: extended);
-  }
-
-  AppBar _appBar(bool isDesktop) {
-    return AppBar(
-      //automaticallyImplyLeading: true,
-      title: !_isShowingRecipe 
-      ? Padding(
-        padding: EdgeInsets.only(left: isDesktop ? 0 : 20),
-        child: Text(_pageTitles[_selectedIndex]),
-      )
-      : null,
-      centerTitle: isDesktop ? true : false,
-      flexibleSpace: !_isShowingRecipe
-      ? ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-          child: Container(
-            width: double.infinity,
-            //height: 40,
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-          ),
-        ),
-      )
-      : null,
-      leading: !_isRootNode 
-      ? Stack(
-        alignment: Alignment.center,
-        children: [
-          _iconBackground(),
-          IconButton(
-            icon: const PhosphorIcon(PhosphorIconsRegular.arrowLeft),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      )
-      : null,
-      actions: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            _iconBackground(),
-            AuthButton(),
-          ],
-        ),
-        SizedBox(width: 5.0),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            _iconBackground(),
-            IconButton(
-              icon: const PhosphorIcon(PhosphorIconsRegular.magnifyingGlass),
-              onPressed: () {
-                showSearch(context: context, delegate: SCSearchDelegate());
-              },
-            ),
-          ],
-        ),
-        SizedBox(width: 20.0),
-      ],
-    );
-  }
-
-  Widget _iconBackground() {
-    return ClipOval(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-        child: Container(
-          width: 40,
-          height: 40,
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-        ),
-      ),
-    );
   }
 }

@@ -37,27 +37,32 @@ class LoginPage extends StatelessWidget {
     }
 
 
-    return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SCImage(
-            imageUrl: "https://firebasestorage.googleapis.com/v0/b/scarpetta-bb13b.appspot.com/o/ramen%20bowl.png?alt=media&token=6dfe018e-5758-42cc-970c-fa3bcda2affc",
-            width: size,
-            height: size,
-          ),
-          SizedBox(height: 100),
-          Text("Log in to get benefits!", style: Theme.of(context).textTheme.displayMedium),
-          SizedBox(height: 60),
-          ElevatedButton(
-            onPressed: () async {
-              await FirebaseAuth.instance.signInAnonymously();
-              //ref.watch(userProvider.notifier).fetchUser();
-            }, 
-            child: Text("Log in")
-          ),
-        ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Login"),
+      ),
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SCImage(
+              imageUrl: "https://firebasestorage.googleapis.com/v0/b/scarpetta-bb13b.appspot.com/o/ramen%20bowl.png?alt=media&token=6dfe018e-5758-42cc-970c-fa3bcda2affc",
+              width: size,
+              height: size,
+            ),
+            SizedBox(height: 100),
+            Text("Log in to get benefits!", style: Theme.of(context).textTheme.displayMedium),
+            SizedBox(height: 60),
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseAuth.instance.signInAnonymously();
+                //ref.watch(userProvider.notifier).fetchUser();
+              }, 
+              child: Text("Log in")
+            ),
+          ],
+        ),
       ),
     );
   }

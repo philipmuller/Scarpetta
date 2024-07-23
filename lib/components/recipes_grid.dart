@@ -64,6 +64,22 @@ class _RecipesGridState extends State<RecipesGrid> {
     //   crossAxisSpacing = 40;
     // }
 
+    if (widget.recipes != null) {
+      return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: numberOfColumns,
+          mainAxisSpacing: mainAxisSpacing,
+          crossAxisSpacing: crossAxisSpacing,
+          childAspectRatio: 0.9,
+        ),
+        padding: widget.padding,
+        itemCount: widget.recipes!.length,
+        itemBuilder: (context, index) {
+          return RecipeCard(recipe: widget.recipes![index], onTap: widget.onRecipeTap);
+        },
+      );
+    }
+
     return Consumer<RecipeProvider>(
       builder: (context, recipeProvider, child) {
         return RefreshIndicator(

@@ -36,7 +36,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   Future<void> _fetchPage(String? pageKey) async {
     try {
       final provider = Provider.of<CategoryProvider>(context, listen: false);
-      final newItems = await provider.fetchCategories(pageKey, _pageSize);
+      final newItems = await provider.fetchCategories(pageKey: pageKey, pageSize: _pageSize);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);

@@ -5,9 +5,9 @@ import 'package:scarpetta/services/cookbook_service.dart';
 
 class CategoryProvider extends ChangeNotifier {
   final Map<String, Category> _categoryMap = {};
-  Map<String, Category> get recipesMap => _categoryMap;
+  Map<String, Category> get categoryMap => _categoryMap;
 
-  Future<List<Category>> fetchCategories(String? pageKey, int pageSize) async {
+  Future<List<Category>> fetchCategories({String? pageKey, int pageSize = 10}) async {
     // Simulate API call to fetch recipes
     final newCategories = await CookbookService.getCategories(pageKey: pageKey, pageSize: pageSize);
 
