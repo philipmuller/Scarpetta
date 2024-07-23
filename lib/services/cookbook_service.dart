@@ -81,25 +81,49 @@ class CookbookService {
     await FirebaseFirestore.instance.collection('recipes').doc(id ?? recipe.id).update(recipe.toMap(includeId: false));
   }
 
-  static Future<List<Recipe>> getRecipes({String? categoryId, String? authorId, List<String>? favouritedByUser}) async {
-    print("CookbookService.getRecipes($categoryId)");
-    //print("Retreiving recipes...");
-    Query<Map<String, dynamic>> query;
-    final category = await _firestore.collection('categories').doc(categoryId).get();
+  static Future<List<Recipe>> getRecipes({
+    String? categoryId,
+    String? authorId,
+    List<String>? favouritedByUser,
+    String? pageKey,
+    int pageSize = 10
+  }) async {
+    print("CookbookService.getRecipes(categoryId: $categoryId, authorId: $authorId, favouritedByUser: $favouritedByUser, pageKey: $pageKey, pageSize: $pageSize)");
 
-    query = _firestore.collection('recipes').where('name', isGreaterThanOrEqualTo: '');
-    if (categoryId != null) query = query.where('categories', arrayContains: category.data()!['name']);
-    if (authorId != null) query = query.where('authorId', isEqualTo: authorId);
-    if (favouritedByUser != null) query = query.where(FieldPath.documentId, whereIn: favouritedByUser);
-    final snapshot = await query.get();
+    Query<Map<String, dynamic>> query = _firestore.collection('recipes');
 
-    final recipes = snapshot.docs.map((doc) {
-      //print(doc.data());
-      final recipe = Recipe.fromMap(map: doc.data(), id: doc.id);
-      return recipe;
+    // Apply filters
+    if (categoryId != null) {
+      query = query.where('categories', arrayContains: categoryId);
+    }
+    if (authorId != null) {
+      query = query.where('authorId', isEqualTo: authorId);
+    }
+    if (favouritedByUser != null && favouritedByUser.isNotEmpty) {
+      query = query.where(FieldPath.documentId, whereIn: favouritedByUser);
+    }
+
+    // Order the query (required for pagination)
+    query = query.orderBy('name');
+
+    // Apply pagination
+    query = query.limit(pageSize);
+    if (pageKey != null) {
+      final documentSnapshot = await _firestore.collection('recipes').doc(pageKey).get();
+      query = query.startAfterDocument(documentSnapshot);
+      
+    }
+    
+
+    // Execute the query
+    final QuerySnapshot<Map<String, dynamic>> snapshot = await query.get();
+
+    // Convert documents to Recipe objects
+    final List<Recipe> recipes = snapshot.docs.map((doc) {
+      return Recipe.fromMap(map: doc.data(), id: doc.id);
     }).toList();
 
-    //print("Recipes retreived: $recipes");
+    print("Recipes retrieved: ${recipes.length}");
 
     return recipes;
   }

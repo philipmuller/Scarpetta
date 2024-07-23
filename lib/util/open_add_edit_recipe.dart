@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/add_edit_recipe_page.dart';

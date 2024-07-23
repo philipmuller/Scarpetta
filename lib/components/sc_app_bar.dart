@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SCAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -83,7 +82,7 @@ class _SCAppBarState extends State<SCAppBar> {
                       isSearching = !isSearching;
             
                       if (!isSearching) {
-                        GoRouter.of(context).go('/'); //this is not good, it needs to pop back to previous instead of home
+                        Navigator.of(context).pushNamed('/'); //this is not good, it needs to pop back to previous instead of home
                       }
                     });
                   },

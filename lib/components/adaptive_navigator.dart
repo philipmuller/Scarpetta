@@ -3,6 +3,7 @@
 import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/components/add_recipe_button.dart';
@@ -10,21 +11,20 @@ import 'package:scarpetta/components/auth_button.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/pages/categories_page.dart';
+import 'package:scarpetta/pages/home_page.dart';
+import 'package:scarpetta/pages/my_favourites_page.dart';
+import 'package:scarpetta/pages/recipes_page.dart';
 import 'package:scarpetta/pages/search_page.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
-import 'package:go_router/go_router.dart';
 import 'package:scarpetta/util/navigator_target.dart';
 import 'package:scarpetta/components/search_bar.dart';
 import 'package:scarpetta/util/open_add_edit_recipe.dart';
 import 'package:scarpetta/util/sc_search_delegate.dart';
 
 class AdaptiveNavigator extends StatefulWidget {
-  final List<NavigatorTarget> routes; //this assumes the app uses go_router
-  final StatefulNavigationShell? navigationShell;
-  final GoRouterState state;
 
-  const AdaptiveNavigator({super.key, required this.routes, required this.state, this.navigationShell});
+  const AdaptiveNavigator({super.key});
 
   @override
   State<AdaptiveNavigator> createState() => _AdaptiveNavigatorState();
@@ -32,27 +32,36 @@ class AdaptiveNavigator extends StatefulWidget {
 
 class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
   int _selectedIndex = 0;
+  List<Widget> _pages = [
+    const HomePage(),
+    const RecipesPage(),
+    const MyFavouritesPage(),
+  ];
+
+  final List<NavigatorTarget> _targets = const [
+    NavigatorTarget(
+      icon: PhosphorIcon(PhosphorIconsRegular.house),
+      label: "Home"
+    ),
+    NavigatorTarget(
+      icon: PhosphorIcon(PhosphorIconsRegular.forkKnife),
+      label: "Recipes"
+    ),
+    NavigatorTarget(
+      icon: PhosphorIcon(PhosphorIconsRegular.user),
+      label: "Profile"
+    ),
+  ];
+
   bool _isShowingRecipe = false;
   bool _isRootNode = true;
-  bool _canPop = false;
-  bool _isShowingAllRecipes = false;
   final _pageTitles = ["Home", "Recipes", "Profile"];
-  bool _isLoggedIn = false;
-
-  @override
-  void initState() {
-    super.initState();
-    print("INIT STATE");
-    _handleRouteChange();
-  }
+  bool _isLoggedIn = FirebaseAuth.instance.currentUser != null;
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
-    GoRouter.of(context).routeInformationProvider.addListener(_handleRouteChange);
-    GoRouter.of(context).routerDelegate.addListener(_handleRouteChange);
-    //GoRouter.of(context).routeInformationProvider.didPopRoute();
 
     if (width >= Breakpoint.lg) {
       return _desktopLayout();
@@ -70,16 +79,15 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         appBar: _appBar(false),
         floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton(false) : null,
         extendBodyBehindAppBar: true,
-        body: widget.navigationShell,
+        body: _pages[_selectedIndex],
         bottomNavigationBar: NavigationBar(
           selectedIndex: _selectedIndex,
           onDestinationSelected: (index) {
-            context.go(widget.routes[index].route);
             setState(() {
               _selectedIndex = index;
             });
           },
-          destinations: widget.routes.map((route) {
+          destinations: _targets.map((route) {
             return NavigationDestination(
               icon: route.icon,
               label: route.label,
@@ -104,20 +112,19 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
             child: Column(
               children: [
                 const Spacer(flex: 2),
-                if (FirebaseAuth.instance.currentUser != null)
+                if (_isLoggedIn)
                   _addRecipeButton(false),
-                SizedBox(height: 20.0)
+                const SizedBox(height: 20.0)
               ],
             ),
           ),
           onDestinationSelected: (index) {
-            context.go(widget.routes[index].route);
             setState(() {
               _selectedIndex = index;
             });
           },
           labelType: NavigationRailLabelType.selected, //extendedRail ? NavigationRailLabelType.none : NavigationRailLabelType.selected,
-          destinations: widget.routes.map((route) {
+          destinations: _targets.map((route) {
             return NavigationRailDestination(
               icon: route.icon,
               label: Text(route.label),
@@ -130,7 +137,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
             appBar: _appBar(false),
             //floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton() : null,
             extendBodyBehindAppBar: true,
-            body: widget.navigationShell,
+            body: _pages[_selectedIndex],
           ),
         )
       ],
@@ -142,9 +149,8 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
       children: [
         NavigationDrawer(
           selectedIndex: _selectedIndex,
-          tilePadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8),
           onDestinationSelected: (index) {
-            context.go(widget.routes[index].route);
             setState(() {
               _selectedIndex = index;
             });
@@ -154,19 +160,19 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
               padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 20),
               child: Text("Scarpetta", style: Theme.of(context).textTheme.displayMedium!.copyWith(color: Theme.of(context).colorScheme.primary)),
             ),
-            SizedBox(height: 20.0),
-            ...widget.routes.map((route) {
+            const SizedBox(height: 20.0),
+            ..._targets.map((route) {
               return NavigationDrawerDestination(
                 icon: route.icon,
                 label: Text(route.label),
               );
             }).toList(),
-            if (FirebaseAuth.instance.currentUser != null)
+            if (_isLoggedIn)
               Padding(
                 padding: EdgeInsets.only(left: 20.0, right: 20.0, top: MediaQuery.of(context).size.height - 430,),
                 child: _addRecipeButton(true),
               ),
-            SizedBox(height: 20.0)
+            const SizedBox(height: 20.0)
           ],
         ),
         //const VerticalDivider(thickness: 1, width: 1),
@@ -175,7 +181,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
             appBar: _appBar(true),
             //floatingActionButton: FirebaseAuth.instance.currentUser != null ? _addRecipeButton() : null,
             extendBodyBehindAppBar: true,
-            body: widget.navigationShell,
+            body: _pages[_selectedIndex],
           ),
         )
       ],
@@ -216,7 +222,7 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
           IconButton(
             icon: const PhosphorIcon(PhosphorIconsRegular.arrowLeft),
             onPressed: () {
-              context.pop();
+              Navigator.of(context).pop();
             },
           ),
         ],
@@ -259,114 +265,5 @@ class _AdaptiveNavigatorState extends State<AdaptiveNavigator> {
         ),
       ),
     );
-  }
-
-  Widget _searchBar() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 30.0, right: 30.0, top: 10.0),
-      child: GestureDetector(
-        onTap: _handleTap,
-        child: SCSearchBar(),
-      ),
-    );
-  }
-
-  void _handleRouteChange() {
-    setState(() {
-      _selectedIndex = _selectedPageIndex();
-
-      final route = GoRouter.of(context).routeInformationProvider.value.uri.toString();
-
-      print(route);
-      print(GoRouter.of(context).canPop());
-      if (GoRouter.of(context).canPop()) {
-        _canPop = true;
-      } else {
-        _canPop = false;
-      }
-
-      if (route.contains("/recipes/") && !route.contains("/recipes/categories")) {
-        _isShowingRecipe = true;
-      } else {
-        _isShowingRecipe = false;
-      }
-
-      if (route != "/" && route != "/recipes" && !route.contains("/recipes/categories/") && route != "/profile" && route != "" && route != "/login") {
-        _isRootNode = false;
-      } else {
-        _isRootNode = true;
-      }
-
-      if (route == "/recipes") {
-        _isShowingAllRecipes = true;
-      } else {
-        _isShowingAllRecipes = false;
-      }
-
-    });
-  }
-
-  int _selectedPageIndex() {
-    final id = GoRouter.of(context).routeInformationProvider.value.uri.toString();
-
-    if (id == null) {
-      return 0;
-    }
-
-    if (id! == "") { //this is a terrible bugfix, I hate it, it is painful
-      return 1;
-    }
-
-    if (id!.contains("home")) {
-      return 0;
-    }
-
-    if (id!.contains("recipe")) {
-      return 1;
-    }
-
-    if (id!.contains("profile")) {
-      return 2;
-    }
-
-    if (id!.contains("login")) {
-      return 2;
-    }
-
-    return 0;
-  }
-
-  _handleTap() {
-    showSearch(context: context, delegate: SCSearchDelegate());
-    // Navigator.of(context).push(
-    //   PageRouteBuilder(
-    //     opaque: false,
-    //     pageBuilder: (context, animation, secondaryAnimation) => SearchPage(),
-    //     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-    //       return Stack(
-    //         children: [
-    //           AnimatedBuilder(
-    //             animation: animation,
-    //             builder: (context, child) {
-    //               return BackdropFilter(
-    //                 filter: ImageFilter.blur(
-    //                   sigmaX: 10.0 * animation.value, 
-    //                   sigmaY: 10.0 * animation.value
-    //                 ), 
-    //                 child: Container(
-    //                   color: Colors.transparent,
-    //                 ),
-    //               );
-    //             },
-    //           ),
-    //           FadeTransition(
-    //             opacity: animation, 
-    //             child: child
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   )
-    // );
   }
 }

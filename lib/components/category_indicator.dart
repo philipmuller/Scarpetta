@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/category.dart';
 
@@ -21,10 +20,10 @@ class CategoryIndicator extends StatelessWidget {
         if (push) {
           print("PUSH IS TRUE");
           print("About to push to /recipes/categories/${category.id}");
-          if (context.canPop()) {
-            context.pop();
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
           }
-          context.replace("/recipes/categories/${category.id}");
+          //Navigator.of(context).replace("/recipes/categories/${category.id}");
         }
       },
       child: Column(

@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/util/breakpoint.dart';
@@ -30,7 +29,7 @@ class RecipeCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         onTap?.call();
-        GoRouter.of(context).push('/recipes/${recipe.id}');
+        Navigator.of(context).pushNamed('/recipes/${recipe.id}');
       },
       child: Container(
         decoration: BoxDecoration(

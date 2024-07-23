@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
@@ -15,16 +13,16 @@ import 'package:scarpetta/components/recipe_card.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
 
-class RecipesPage extends ConsumerStatefulWidget {
+class RecipesPage extends StatefulWidget {
   final String? categoryId;
 
   const RecipesPage({super.key, this.categoryId});
 
   @override
-  ConsumerState<RecipesPage> createState() => _RecipesPageState();
+  State<RecipesPage> createState() => _RecipesPageState();
 }
 
-class _RecipesPageState extends ConsumerState<RecipesPage> {
+class _RecipesPageState extends State<RecipesPage> {
   final double topPadding = 55.0;
   final double xPadding = 30.0;
 
@@ -33,19 +31,19 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
     print("STATE RELOADED");
     super.initState();
     Future.microtask(() async {
-      ref.read(recipesProvider.notifier).fetchRecipes();
-      ref.read(recipesProvider.notifier).filterByCategory(widget.categoryId);
+      // ref.read(recipeProvider.notifier).fetchRecipes();
+      // ref.read(recipeProvider.notifier).filterByCategory(widget.categoryId);
       if (widget.categoryId != null) {
         final category = await CookbookService.getCategory(widget.categoryId!);
-        ref.read(selectedCategoryProvider.notifier).update((state) => state = category.name);
+        //ref.read(selectedCategoryProvider.notifier).update((state) => state = category.name);
       }
     });
   }
   
   @override
   Widget build(BuildContext context) {
-    final recipes = ref.watch(recipesProvider);
-    final selectedCategory = ref.watch(selectedCategoryProvider);
+    //final recipes = ref.watch(recipesProvider);
+    //final selectedCategory = ref.watch(selectedCategoryProvider);
 
     double width = MediaQuery.of(context).size.width;
     bool mobileModal = true;
@@ -65,14 +63,10 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
             children: [
               Padding(
                 padding: EdgeInsets.only(top: topPadding),
-                child: recipes.when(
-                  data: (state) => RecipesGrid(
+                child: RecipesGrid(
                     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-                    recipes: state,
+                    //recipes: state,
                   ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (error, stack) => Center(child: Text('Error: $error')),
-                ),
               ),
               if (!isDesktop)
                 Padding(
@@ -89,7 +83,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                     icon: const PhosphorIcon(PhosphorIconsRegular.squaresFour),
                   ),
                 ),
-              if (selectedCategory != null)
+              if (false)//(selectedCategory != null)
                 Positioned(
                   top: 50,
                   child: Padding(
@@ -111,7 +105,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                       child: Row(
                         children: [
                           Text(
-                            selectedCategory,
+                            "",//selectedCategory,
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w500
@@ -120,8 +114,7 @@ class _RecipesPageState extends ConsumerState<RecipesPage> {
                           const SizedBox(width: 5),
                           IconButton(
                             onPressed: () {
-                              ref.read(selectedCategoryProvider.notifier).update((state) => state = null);
-                              GoRouter.of(context).replace('/recipes');
+                              //ref.read(selectedCategoryProvider.notifier).update((state) => state = null);
                             }, 
                             icon: const PhosphorIcon(PhosphorIconsRegular.x, size: 20),
                           )

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:scarpetta/components/plate.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
@@ -12,7 +11,7 @@ class FeaturedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        GoRouter.of(context).push("/recipes/${recipe.id}");
+        Navigator.of(context).pushNamed("/recipes/${recipe.id}");
       },
       child: Container(
         clipBehavior: Clip.antiAlias,

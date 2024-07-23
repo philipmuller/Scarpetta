@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/components/featured_card.dart';
 import 'package:scarpetta/components/category_indicator.dart';
@@ -22,17 +20,17 @@ final mockCategories = [
   "Drinks",
 ];
 
-class HomePage extends ConsumerWidget {
+class HomePage extends StatelessWidget {
   final double topPadding = 65.0;
   final double xPadding = 30.0;
 
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final categories = ref.watch(categoriesProvider);
-    final recipes = ref.watch(recipesProvider);
-    final featuredRecipe = recipes.value?[0];
+  Widget build(BuildContext context){//, WidgetRef ref) {
+    //final categories = ref.watch(categoriesProvider);
+    //final recipes = ref.watch(recipesProvider);
+    //final featuredRecipe = recipes.value?[0];
 
     double width = MediaQuery.of(context).size.width;
     bool mobileModal = true;
@@ -52,7 +50,7 @@ class HomePage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FeaturedCard(recipe: featuredRecipe ?? Recipe(name: "Loading...", description: "Loading...")),
+            //FeaturedCard(recipe: featuredRecipe ?? Recipe(name: "Loading...", description: "Loading...")),
             const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -63,7 +61,7 @@ class HomePage extends ConsumerWidget {
                   TextButton(
                     onPressed: () {
                       if (isDesktop) {
-                        context.go('/recipes');
+                        //Navigator.of(context).('/recipes');
                         return;
                       }
 
@@ -82,19 +80,19 @@ class HomePage extends ConsumerWidget {
               clipBehavior: Clip.none,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(left: 8.0),
-              child: categories.when(
-                data: (state) => Row(
-                  children: state
-                    .take(isDesktop ? 10 : 6)
-                    .map((category) => Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
-                      child: CategoryIndicator(category: category, push: true,),
-                    ))
-                    .toList()
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(child: Text('Error: $error')),
-              ), 
+              child: Text("ksmdk"),//[].when(
+                // data: (state) => Row(
+                //   children: state
+                //     .take(isDesktop ? 10 : 6)
+                //     .map((category) => Padding(
+                //       padding: const EdgeInsets.only(right: 10.0),
+                //       child: CategoryIndicator(category: category, push: true,),
+                //     ))
+                //     .toList()
+                // ),
+                // loading: () => const Center(child: CircularProgressIndicator()),
+                // error: (error, stack) => Center(child: Text('Error: $error')),
+              //), 
             )
           ],
         ),
