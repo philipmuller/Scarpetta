@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
-import 'package:scarpetta/providers&state/recipes_provider.dart';
-import 'package:scarpetta/providers&state/user_provider.dart';
 
 class MyRecipesPage extends StatelessWidget {
   const MyRecipesPage({Key? key}) : super(key: key);

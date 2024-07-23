@@ -6,11 +6,8 @@ import 'package:scarpetta/components/favourites_button.dart';
 import 'package:scarpetta/components/sc_app_bar.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/recipe.dart';
-import 'package:scarpetta/providers&state/navigation_state_provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/providers&state/session_provider.dart';
-import 'package:scarpetta/providers&state/user_provider.dart';
-import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_add_edit_recipe.dart';
 

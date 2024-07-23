@@ -4,9 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/model/category.dart';
-import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/providers&state/categories_provider.dart';
-import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 
 class CategoriesPage extends StatefulWidget {

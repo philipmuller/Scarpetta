@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:scarpetta/components/add_recipe_button.dart';
-import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/components/recipes_grid.dart';
 import 'package:scarpetta/components/sc_app_bar.dart';
 import 'package:scarpetta/model/category.dart';
-import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/categories_page.dart';
-import 'package:scarpetta/providers&state/categories_provider.dart';
-import 'package:scarpetta/providers&state/recipes_provider.dart';
-import 'package:scarpetta/providers&state/selected_category_provider.dart';
 import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
-import 'package:scarpetta/components/recipe_card.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
 

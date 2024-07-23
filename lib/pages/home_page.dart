@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:scarpetta/components/add_recipe_button.dart';
 import 'package:scarpetta/components/featured_card.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/components/sc_app_bar.dart';
-import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/recipe.dart';
-import 'package:scarpetta/pages/categories_page.dart';
 import 'package:scarpetta/providers&state/categories_provider.dart';
+import 'package:scarpetta/providers&state/navigation_state_provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/providers&state/session_provider.dart';
-import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
 
@@ -25,7 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final double topPadding = 60.0;
+  final double topPadding = kToolbarHeight + 20;
 
   final double xPadding = 30.0;
 
@@ -43,6 +40,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context){
     final session = Provider.of<SessionProvider>(context);
+    final navigatorProvider = Provider.of<NavigationState>(context);
 
     double width = MediaQuery.of(context).size.width;
     bool isMobile = true;
@@ -88,13 +86,13 @@ class _HomePageState extends State<HomePage> {
                     TextButton(
                       onPressed: () {
                         if (isDesktop) {
-                          //Navigator.of(context).('/recipes');
-                          return;
+                          navigatorProvider.setIndex(1);
+                        } else {
+                          openCategories(
+                            context: context, 
+                            isMobile: isMobile, 
+                          );
                         }
-                        openCategories(
-                          context: context, 
-                          isMobile: isMobile, 
-                        );
                       },
                       child: const Text("See all"),
                     ),

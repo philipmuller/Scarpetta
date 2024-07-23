@@ -8,6 +8,11 @@ class RecipeStep {
   RecipeStep({required this.description, this.type, this.duration});
 
   factory RecipeStep.fromMap({required Map<String, dynamic> map}) {
+    print("Starting conversion of RecipeStep from map named ${map['description']}");
+    print("${map['description']} of type ${map['description'].runtimeType}");
+    print("${map['type']} of type ${map['type'].runtimeType}");
+    print("${map['duration']} of type ${map['duration'].runtimeType}");
+
     return RecipeStep(
       description: map['description'],
       type: map['type'],

@@ -7,6 +7,10 @@ class Duration {
   Duration({required this.value, required this.unit});
 
   factory Duration.fromMap(Map<String, dynamic> map) {
+    print("Starting conversion of Duration from map named ${map['value']}");
+
+    print("${map['value']} of type ${map['value'].runtimeType}");
+    print("${map['unit']} of type ${map['unit'].runtimeType}");
     return Duration(
       value: map['value'],
       unit: Unit.fromMap(map: map['unit']),

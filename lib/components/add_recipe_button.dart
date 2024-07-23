@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:scarpetta/providers&state/recipes_provider.dart';
-import 'package:scarpetta/providers&state/session_provider.dart';
-import 'package:scarpetta/providers&state/user_provider.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_add_edit_recipe.dart';
 

@@ -84,5 +84,3 @@ class RecipeProvider extends ChangeNotifier {
     return newRecipes;
   }
 }
-
-final recipeProvider = RecipeProvider();

@@ -1,30 +1,17 @@
 //this compoent was inspired by the Adaptive Scaffold from the flutter samples at https://github.com/flutter/samples/blob/main/experimental/web_dashboard/lib/src/widgets/third_party/adaptive_scaffold.dart
 
-import 'dart:ui';
-
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:scarpetta/components/add_recipe_button.dart';
-import 'package:scarpetta/components/auth_button.dart';
-import 'package:scarpetta/components/recipes_grid.dart';
-import 'package:scarpetta/model/category.dart';
-import 'package:scarpetta/pages/categories_page.dart';
 import 'package:scarpetta/pages/home_page.dart';
 import 'package:scarpetta/pages/login_page.dart';
-import 'package:scarpetta/pages/my_favourites_page.dart';
 import 'package:scarpetta/pages/profile_page.dart';
 import 'package:scarpetta/pages/recipes_page.dart';
 import 'package:scarpetta/providers&state/navigation_state_provider.dart';
 import 'package:scarpetta/providers&state/session_provider.dart';
-import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/navigator_target.dart';
-import 'package:scarpetta/components/search_bar.dart';
-import 'package:scarpetta/util/open_add_edit_recipe.dart';
-import 'package:scarpetta/util/sc_search_delegate.dart';
 
 class AdaptiveNavigator extends StatefulWidget {
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:scarpetta/model/category.dart';
-import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 
 class CategoryProvider extends ChangeNotifier {
@@ -19,5 +18,3 @@ class CategoryProvider extends ChangeNotifier {
     return newCategories;
   }
 }
-
-final categoryProvider = CategoryProvider();

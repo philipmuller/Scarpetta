@@ -1,18 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:scarpetta/components/featured_card.dart';
-import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/components/sc_image.dart';
-import 'package:scarpetta/model/category.dart';
-import 'package:scarpetta/model/recipe.dart';
-import 'package:scarpetta/pages/categories_page.dart';
 import 'package:scarpetta/providers&state/session_provider.dart';
-import 'package:scarpetta/providers&state/user_provider.dart';
-import 'package:scarpetta/services/cookbook_service.dart';
 import 'package:scarpetta/util/breakpoint.dart';
-import 'package:scarpetta/util/open_categories.dart';
 
 class LoginPage extends StatelessWidget {
   final double topPadding = 65.0;

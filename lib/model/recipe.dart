@@ -29,11 +29,19 @@ class Recipe {
 
   factory Recipe.fromMap({required Map<String, dynamic> map, String? id}) {
 
+    print("Starting conversion of Recipe from map named ${map['name']}");
+
     List<RecipeIngredient> ingredientsList = [];
     final ingredientsMapList = map['ingredients'];
+    print("${map['ingredients']} of type ${map['ingredients'].runtimeType}");
     if (ingredientsMapList != null && ingredientsMapList.isNotEmpty) {
-      ingredientsList = (ingredientsMapList as List).map((ingredient) => RecipeIngredient.fromMap(map: ingredient)).toList();
+      ingredientsList = (ingredientsMapList as List).map((ingredient) {
+        print("${ingredient} of type ${ingredient.runtimeType}");
+        return RecipeIngredient.fromMap(map: ingredient);
+      }).toList();
     }
+
+    print("successfully converted ingredients");
 
     List<RecipeStep> stepsList = [];
     final stepsMapList = map['steps'];
@@ -41,11 +49,24 @@ class Recipe {
       stepsList = (stepsMapList as List).map((step) => RecipeStep.fromMap(map: step)).toList();
     }
 
+    print("successfully converted steps");
+
     List<Category> categoriesList = [];
     final categoriesStringList = map['categories'];
     if (categoriesStringList != null && categoriesStringList.isNotEmpty) {
       categoriesList = (categoriesStringList as List).map((categoryName) => Category(name: categoryName)).toList();
     }
+
+    print("successfully converted categories");
+
+    print("${map['authorId']} of type ${map['authorId'].runtimeType}");
+    print("${map['id']} of type ${map['id'].runtimeType}");
+    print("${map['name']} of type ${map['name'].runtimeType}");
+    print("${map['description']} of type ${map['description'].runtimeType}");
+    print("${map['imageUrl']} of type ${map['imageUrl'].runtimeType}");
+    print("${map['favouriteCount']} of type ${map['favouriteCount'].runtimeType}");
+    print("${ingredientsList} of type ${ingredientsList.runtimeType}");
+    print("${stepsList} of type ${stepsList.runtimeType}");
 
     return Recipe(
       id: id ?? map['id'],

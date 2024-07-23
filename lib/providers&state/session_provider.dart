@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:scarpetta/model/user_data.dart';
 import 'package:scarpetta/services/cookbook_service.dart';
 
 class SessionProvider extends ChangeNotifier {

@@ -24,5 +24,3 @@ class NavigationState extends ChangeNotifier {
     navigatorKeys[tabIndex].currentState?.pop();
   }
 }
-
-final navigationStateProvider = NavigationState();

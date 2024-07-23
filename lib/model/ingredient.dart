@@ -59,18 +59,17 @@ class RecipeIngredient {
   RecipeIngredient.fromIngredient({required this.ingredient, required this.quantity, required this.unit});
 
   factory RecipeIngredient.fromMap({required Map<String, dynamic> map}) {
-    //print("RecipeIngredient.fromMap: $map");
+    print("RecipeIngredient.fromMap: $map");
     final ingredientReference = map['reference'];
     String? ingredientReferenceId;
     if (ingredientReference != null) {
       ingredientReferenceId = ingredientReference.id;
       //print(ingredientReferenceId);
     }
-    
-
+    print("${map['quantity']} of type ${map['quantity'].runtimeType}");
     return RecipeIngredient.fromIngredient(
       ingredient: Ingredient.fromMap(map: map['ingredient'], id: ingredientReferenceId),
-      quantity: map['quantity'],
+      quantity: map['quantity'].toDouble(),
       unit: Unit.fromMap(map: map['unit']),
     );
   }

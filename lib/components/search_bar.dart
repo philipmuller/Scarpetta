@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class SCSearchBar extends StatelessWidget {

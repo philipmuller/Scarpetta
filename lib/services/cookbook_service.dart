@@ -150,6 +150,7 @@ class CookbookService {
 
       print("Converting documents to Recipe objects...");
       final List<Recipe> recipes = snapshot.docs.map((doc) {
+        print('Before conversion: ${doc.data()}');
         final recipe = Recipe.fromMap(map: doc.data(), id: doc.id);
         print(recipe.name);
         return recipe;

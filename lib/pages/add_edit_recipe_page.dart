@@ -1,15 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:scarpetta/components/adaptive_navigator.dart';
 import 'package:scarpetta/components/category_indicator.dart';
 import 'package:scarpetta/model/category.dart';
 import 'package:scarpetta/model/ingredient.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/model/recipe_step.dart';
 import 'package:scarpetta/model/unit.dart';
-import 'package:scarpetta/providers&state/recipes_provider.dart';
 import 'package:scarpetta/util/breakpoint.dart';
 import 'package:scarpetta/util/open_categories.dart';
 
@@ -128,6 +125,7 @@ class _AddEditRecipePageState extends State<AddEditRecipePage> {
       final newRecipe = Recipe(
         name: _name,
         authorId: FirebaseAuth.instance.currentUser?.uid,
+        imageUrl: 'https://firebasestorage.googleapis.com/v0/b/scarpetta-bb13b.appspot.com/o/DALL%C2%B7E%20Food%20Mosaic.webp?alt=media&token=4e921454-157f-411d-9af4-6e952e71edb5',
         description: _description,
         ingredients: _ingredients,
         steps: _steps,

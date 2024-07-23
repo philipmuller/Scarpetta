@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:scarpetta/model/recipe.dart';
 import 'package:scarpetta/pages/add_edit_recipe_page.dart';
-import 'package:scarpetta/pages/categories_page.dart';
 
 void openAddEditRecipe({required BuildContext context, bool isMobile = false, Recipe? recipeToEdit, Function(Recipe)? onSubmit}) {
   if (isMobile) {

@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:scarpetta/components/sc_image.dart';
 import 'package:scarpetta/model/category.dart';
-import 'package:scarpetta/model/recipe.dart';
-import 'package:scarpetta/pages/recipe_page.dart';
 import 'package:scarpetta/pages/recipes_page.dart';
 import 'package:scarpetta/providers&state/navigation_state_provider.dart';
+import 'package:scarpetta/util/breakpoint.dart';
 
 class CategoryIndicator extends StatelessWidget {
   final double size;
@@ -18,6 +17,9 @@ class CategoryIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    MediaQueryData mediaQuery = MediaQuery.of(context);
+    final width = mediaQuery.size.width;
+    final isMobile = width < Breakpoint.md;
     //print("Category indicator: $name");
     return GestureDetector(
       onTap: () {
@@ -39,7 +41,7 @@ class CategoryIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
             ),
-            child: SCImage(imageUrl: category.imageUrl, height: size, width: size),
+            child: SCImage(imageUrl: category.imageUrl, height: isMobile ? 80 : size, width: isMobile ? 80 : size),
           ),
           const SizedBox(height: 10.0),
           Text(category.name, style: Theme.of(context).textTheme.titleSmall),

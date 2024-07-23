@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:321894958419:android:aa66e69d7c73a01c6ccda6",
         "android_client_info": {
-          "package_name": "com.scarpetta.app"
+          "package_name": "com.example.scarpetta"
         }
       },
       "oauth_client": [],

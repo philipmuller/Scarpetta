@@ -9,10 +9,10 @@ import 'package:scarpetta/providers&state/session_provider.dart';
 import 'package:scarpetta/themes/main_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
-  //WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -23,9 +23,9 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => recipeProvider),
-      ChangeNotifierProvider(create: (_) => categoryProvider),
-      ChangeNotifierProvider(create: (_) => navigationStateProvider),
+      ChangeNotifierProvider(create: (_) => RecipeProvider()),
+      ChangeNotifierProvider(create: (_) => CategoryProvider()),
+      ChangeNotifierProvider(create: (_) => NavigationState()),
       ChangeNotifierProvider(create: (_) => SessionProvider())
     ],
     child: Scarpetta()
