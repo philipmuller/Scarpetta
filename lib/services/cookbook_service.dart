@@ -25,9 +25,9 @@ class CookbookService {
 
   static Future<Recipe> getFeaturedRecipe() async {
     print("CookbookService.getFeaturedRecipe()");
-    final recipes = await CookbookService.getRecipes();
-    if (recipes.isEmpty) return mockRecipes[0];
-    return recipes[0];
+    final recipe = await CookbookService.getRecipe("RXcchNZioHaVpU9okBPw");
+    if (recipe == null) return mockRecipes[0];
+    return recipe;
   }
 
   static Future<DocumentSnapshot<Map<String, dynamic>>?> _getUserInformation(String userId) async {

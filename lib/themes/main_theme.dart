@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
@@ -124,7 +126,31 @@ class MainTheme extends ThemeExtension<MainTheme> {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.surface,
-      )
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all(colorScheme.onSurface),
+          iconColor: WidgetStateProperty.all(colorScheme.onSurface),
+          backgroundBuilder: (context, states, child) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                ClipOval(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      color: colorScheme.surface.withOpacity(0.7),
+                    ),
+                  ),
+                ),
+                child ?? const SizedBox(),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
