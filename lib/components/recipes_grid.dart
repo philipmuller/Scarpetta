@@ -143,15 +143,29 @@ class _RecipesGridState extends State<RecipesGrid> {
             padding: widget.padding,
             builderDelegate: PagedChildBuilderDelegate<Recipe>(
               itemBuilder: (context, recipe, index) {
+                final sessionProvider = Provider.of<SessionProvider>(context, listen: true);
                 return RecipeCard.withDetails(
                   name: recipeProvider.recipesMap[recipe.id]?.name ?? recipe.name,
                   description: recipeProvider.recipesMap[recipe.id]?.description ?? recipe.description,
                   imageUrl: recipeProvider.recipesMap[recipe.id]?.imageUrl ?? recipe.imageUrl,
                   favouriteCount: recipeProvider.recipesMap[recipe.id]?.favouriteCount ?? recipe.favouriteCount,
                   recipeId: recipe.id,
+                  isFavourite: sessionProvider.userFavourites.contains(recipe.id),
                   onTap: () {
                     widget.onRecipeTap?.call();
                     Navigator.push(context, MaterialPageRoute(builder: (context) => RecipePage(recipe: recipeProvider.recipesMap[recipe.id] ?? recipe)));
+                  },
+                  onFavouriteTapped: () {
+                    if (sessionProvider.isLoggedIn) {
+                      if (sessionProvider.userFavourites.contains(recipe.id)) {
+                        sessionProvider.removeFavourite(recipe.id);
+                        recipeProvider.removeFavourite(recipe.id);
+
+                      } else {
+                        sessionProvider.addFavourite(recipe.id);
+                        recipeProvider.addFavourite(recipe.id);
+                      }
+                    }
                   },
                 );
               },

@@ -15,10 +15,12 @@ class RecipeCard extends StatelessWidget {
   final String? imageUrl;
   final int? favouriteCount;
   final String? recipeId;
+  final bool isFavourite;
   final Function()? onTap;
+  final Function()? onFavouriteTapped;
 
-  const RecipeCard.withRecipe({super.key, required this.recipe, this.onTap}) : name = null, description = null, imageUrl = null, favouriteCount = null, recipeId = null;
-  const RecipeCard.withDetails({super.key, required String name, required String description, required int favouriteCount, required String recipeId, required Function()? onTap, required this.imageUrl}) : recipe = null, name = name, description = description, favouriteCount = favouriteCount, recipeId = recipeId, onTap = onTap;
+  const RecipeCard.withRecipe({super.key, required this.recipe, this.onTap, this.onFavouriteTapped, this.isFavourite = false}) : name = null, description = null, imageUrl = null, favouriteCount = null, recipeId = null;
+  const RecipeCard.withDetails({super.key, required String name, required String description, required int favouriteCount, required String recipeId, required Function()? onTap, required this.imageUrl, this.onFavouriteTapped, this.isFavourite = false}) : recipe = null, name = name, description = description, favouriteCount = favouriteCount, recipeId = recipeId, onTap = onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,6 @@ class RecipeCard extends StatelessWidget {
     TextStyle descriptionStyle = Theme.of(context).textTheme.bodyMedium!;
 
     final sessionProvider = Provider.of<SessionProvider>(context);
-    final recipesProvider = Provider.of<RecipeProvider>(context, listen: false);
 
     if (width > Breakpoint.md) {
       verticalPadding = 20.0;
@@ -80,10 +81,9 @@ class RecipeCard extends StatelessWidget {
                 ),
               ],
             ),
-            if (sessionProvider.isLoggedIn)
-              Positioned(
-                child: FavouritesButton(recipeId: recipeId ?? recipe!.id, count: favouriteCount ?? recipe!.favouriteCount, maxWidth: 80),
-              )
+            Positioned(
+              child: FavouritesButton(recipeId: recipeId ?? recipe!.id, count: favouriteCount ?? recipe!.favouriteCount, maxWidth: 80, isFilled: isFavourite, onPressed: sessionProvider.isLoggedIn ? onFavouriteTapped : null,),
+            )
           ],
         ),
       ),

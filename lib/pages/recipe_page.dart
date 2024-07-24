@@ -125,8 +125,22 @@ class _RecipePageState extends State<RecipePage> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Flexible(child: Text(recipeProvider.recipesMap[widget.recipe.id]?.name ?? widget.recipe.name, style: Theme.of(context).textTheme.displayMedium)),
-                          if (FirebaseAuth.instance.currentUser?.uid != null)
-                            FavouritesButton(recipeId: widget.recipe.id, count: recipeProvider.recipesMap[widget.recipe.id]?.favouriteCount ?? widget.recipe.favouriteCount,)
+                          FavouritesButton(
+                            recipeId: widget.recipe.id, 
+                            count: recipeProvider.recipesMap[widget.recipe.id]?.favouriteCount ?? widget.recipe.favouriteCount,
+                            isFilled: sessionProvider.userFavourites.contains(widget.recipe.id),
+                            onPressed: sessionProvider.isLoggedIn
+                            ? () {
+                              if (sessionProvider.userFavourites.contains(widget.recipe.id)) {
+                                sessionProvider.removeFavourite(widget.recipe.id);
+                                recipeProvider.removeFavourite(widget.recipe.id);
+                              } else {
+                                sessionProvider.addFavourite(widget.recipe.id);
+                                recipeProvider.addFavourite(widget.recipe.id);
+                              }
+                            }
+                            : null,
+                          )
                         ],
                       ),
                       const SizedBox(height: 20.0),
