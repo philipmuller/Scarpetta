@@ -9,6 +9,8 @@ class FeaturedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) => RecipePage(recipe: recipe)));
@@ -16,7 +18,7 @@ class FeaturedCard extends StatelessWidget {
       },
       child: Container(
         clipBehavior: Clip.antiAlias,
-        height: 600,
+        height: (height*0.60),
         width: double.infinity,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,

@@ -103,6 +103,8 @@ class MainTheme extends ThemeExtension<MainTheme> {
           backgroundColor: colorScheme.secondaryContainer,
           foregroundColor: colorScheme.onSecondaryContainer,
           shadowColor: colorScheme.shadow,
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          textStyle: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w500),
           elevation: 1,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30)
